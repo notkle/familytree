@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Family Tree</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500&family=Noto+Serif:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f7f1e4;
+    --card: #efe4c8;
+    --card-border: rgba(171, 138, 63, 0.28);
+    --ink: #211d18;
+    --ink-soft: #6b6153;
+    --line: #d9cdb3;
+    --gold: #ab8a3f;
+    --auburn: #9e472a;
+    --indigo: #2e4057;
+    --plum: #7a3b54;
+    --grey: #948a78;
+    --serif: "Noto Serif", "Times New Roman", serif;
+    --sans: "Noto Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --toggle-h: 44px;
+    --gutter: clamp(18px, 5vw, 24px);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.5;
+    overflow-wrap: break-word;
+  }
+
+  a { color: inherit; }
+
+  /* Generation word styling */
+  .gen-marker {
+    color: var(--auburn);
+    font-weight: 600;
+  }
+
+  /* Crown icon styling */
+  .crown-icon {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-left: 5px;
+    vertical-align: middle;
+    color: var(--gold);
+    text-decoration: none !important;
+  }
+
+  /* Language toggle */
+  .lang-toggle {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--toggle-h);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--sans);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    z-index: 10;
+    background: var(--paper);
+    padding: 0 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .lang-toggle button {
+    background: none;
+    border: none;
+    padding: 10px 8px;
+    margin: 0 2px;
+    font: inherit;
+    color: var(--grey);
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+    min-width: 32px;
+    min-height: 32px;
+  }
+
+  .lang-toggle button.active {
+    color: var(--ink);
+    border-bottom-color: var(--gold);
+  }
+
+  .lang-toggle button:focus-visible,
+  a:focus-visible {
+    outline: 2px solid var(--indigo);
+    outline-offset: 2px;
+  }
+
+  /* Header & Color Key */
+  .page-head {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: calc(var(--toggle-h) + 16px) var(--gutter) 16px;
+    text-align: left;
+  }
+
+  .page-head h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(22px, 6vw, 28px);
+    margin: 0 0 6px;
+  }
+
+  .page-head p {
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  .legend-key {
+    max-width: 560px;
+    margin: 0 auto 16px;
+    padding: 0 var(--gutter);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink);
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    margin-top: 4px;
+    border-radius: 50%;
+    background-color: var(--auburn);
+    flex-shrink: 0;
+  }
+
+  .legend-link {
+    display: inline-block;
+    font-weight: 500;
+    text-decoration: none;
+    border-bottom: 1.5px solid var(--gold);
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+    padding: 2px 0;
+  }
+
+  .legend-link:hover,
+  .legend-link:focus-visible {
+    border-bottom-color: var(--indigo);
+    color: var(--indigo);
+  }
+
+  .legend-link:focus-visible {
+    outline: 2px solid var(--indigo);
+    outline-offset: 2px;
+  }
+
+  /* Tree view */
+  .tree {
+    position: relative;
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 0 var(--gutter) 100px;
+  }
+
+  .tree::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    top: 38px;
+    bottom: 38px;
+    left: calc(var(--gutter) + 22px);
+    width: 1px;
+    background: var(--line);
+  }
+
+  .node {
+    position: relative;
+    z-index: 1;
+    margin: 16px 0;
+    padding: clamp(16px, 4vw, 20px) clamp(16px, 4vw, 22px);
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+  }
+
+  .person-row {
+    display: flex;
+    align-items: flex-start;
+    gap: clamp(12px, 4vw, 18px);
+    position: relative;
+  }
+
+  .person-row + .person-row { margin-top: 14px; }
+
+  .icon-wrap {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card);
+    position: relative;
+    z-index: 1;
+  }
+
+  .icon-wrap svg { width: 26px; height: 26px; display: block; }
+
+  .person-info { padding-top: 6px; }
+
+  .person-name {
+    position: relative;
+    font-family: var(--serif);
+    font-size: clamp(17px, 4.5vw, 19px);
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1.5px solid var(--gold);
+    transition: border-color 0.15s ease, color 0.15s ease;
+    cursor: pointer;
+    background: none;
+    padding: 0;
+    display: inline;
+  }
+
+  /* Invisible hit-slop: enlarges the tap target on touch devices
+     without changing the visible underline/box of the text itself. */
+  .person-name::after {
+    content: "";
+    position: absolute;
+    top: -10px;
+    bottom: -6px;
+    left: -6px;
+    right: -6px;
+  }
+
+  .person-name:hover,
+  .person-name:focus-visible {
+    border-bottom-color: var(--indigo);
+    color: var(--indigo);
+  }
+
+  .person-name:focus-visible {
+    outline: 2px solid var(--indigo);
+    outline-offset: 3px;
+  }
+
+  .person-name.is-placeholder {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink-soft);
+  }
+
+  .person-name.non-clickable {
+    cursor: default;
+    border-bottom: none;
+  }
+
+  .person-name.non-clickable:hover {
+    color: var(--ink);
+  }
+
+  .person-title {
+    display: block;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+
+  /* Information / Person Detail View */
+  .detail-page {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: calc(var(--toggle-h) + 16px) var(--gutter) 100px;
+  }
+
+  .back-link {
+    display: inline-block;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink-soft);
+    text-decoration: none;
+    margin-bottom: 28px;
+    border-bottom: 1px solid transparent;
+    background: none;
+    border-top: none; border-left: none; border-right: none;
+    padding: 10px 4px;
+    margin-left: -4px;
+    cursor: pointer;
+    min-height: 44px;
+  }
+
+  .back-link:hover, .back-link:focus-visible { border-bottom-color: var(--ink-soft); }
+
+  .detail-header {
+    display: flex;
+    align-items: center;
+    gap: clamp(12px, 4vw, 18px);
+    margin-bottom: 28px;
+  }
+
+  .detail-header .icon-wrap {
+    flex: 0 0 clamp(44px, 12vw, 56px);
+    width: clamp(44px, 12vw, 56px);
+    height: clamp(44px, 12vw, 56px);
+    background: transparent;
+  }
+
+  .detail-header .icon-wrap svg { width: 70%; height: 70%; }
+
+  .detail-header h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(22px, 6.5vw, 30px);
+    margin: 0;
+    overflow-wrap: break-word;
+  }
+
+  .detail-header h1.is-placeholder {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink-soft);
+  }
+
+  .detail-header .subtitle {
+    display: block;
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+
+  .detail-body {
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.75;
+  }
+
+  .detail-body p { margin: 0 0 1.2em; }
+  .detail-body p:last-child { margin-bottom: 0; }
+
+  .detail-body h2 {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 1.6em 0 0.8em;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .detail-body h2:first-child {
+    margin-top: 0;
+  }
+
+  .detail-body h3 {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--auburn);
+    margin: 1.5em 0 0.6em;
+  }
+
+  .detail-body ul {
+    margin: 0 0 1.2em;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .detail-body li {
+    position: relative;
+    padding-left: 18px;
+    margin: 0.5em 0;
+  }
+
+  .detail-body li::before {
+    content: "\2013";
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+  }
+
+  /* Custom Executive Metadata Grid for Monarchs & Royal Figures */
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 0 0 24px;
+    font-family: var(--sans);
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .meta-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--auburn);
+    margin-bottom: 2px;
+  }
+
+  .meta-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  /* Highlight class for highlighted ancestral lines */
+  .highlight-auburn {
+    color: var(--auburn);
+    font-weight: 600;
+  }
+
+  /* Blockquote styling */
+  .quote-poem-block {
+    display: block;
+    margin: 1.2em 0;
+    padding: 14px 18px;
+    background: var(--card);
+    border-left: 4px solid var(--auburn);
+    border-radius: 0 8px 8px 0;
+    color: var(--auburn);
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  /* Info Page Custom Layout Components */
+  .section-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin: 1.5em 0;
+  }
+
+  .poem-box {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px dashed var(--gold);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 1.2em 0;
+  }
+
+  .poem-hanzi {
+    font-family: var(--serif);
+    font-size: 18px;
+    letter-spacing: 0.3em;
+    margin-bottom: 8px;
+    color: var(--ink);
+  }
+
+  .poem-pinyin {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--auburn);
+  }
+
+  .poem-translation {
+    font-size: 14px;
+    font-style: italic;
+    color: var(--ink-soft);
+    margin-top: 10px;
+  }
+
+  .gender-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .badge-male {
+    background-color: rgba(46, 64, 87, 0.12);
+    color: var(--indigo);
+  }
+
+  .badge-female {
+    background-color: rgba(122, 59, 84, 0.12);
+    color: var(--plum);
+  }
+
+  .title-list {
+    margin: 0.5em 0;
+  }
+
+  .title-item {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+    border-bottom: 1px dotted var(--line);
+  }
+
+  .title-item:last-child {
+    border-bottom: none;
+  }
+
+  .title-name {
+    font-family: var(--serif);
+    font-weight: 600;
+    color: var(--plum);
+  }
+
+  .title-desc {
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  /* Poem Character Meanings List */
+  .char-meaning-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 1em 0;
+  }
+
+  .char-meaning-list li {
+    padding-left: 0;
+    margin: 0.4em 0;
+    font-size: 15px;
+  }
+
+  .char-meaning-list li::before {
+    content: none;
+  }
+
+  .char-word {
+    font-weight: 600;
+    color: var(--auburn);
+    font-family: var(--sans);
+  }
+
+  [hidden] { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .person-name, .legend-link { transition: none; }
+  }
+
+  /* Small phones (e.g. SE, older Android) */
+  @media (max-width: 380px) {
+    .person-row { gap: 10px; }
+    .person-row + .person-row { margin-top: 12px; }
+  }
+
+  @media (max-width: 420px) {
+    .meta-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Landscape phones: shrink the reserved top space a little */
+  @media (max-height: 480px) and (orientation: landscape) {
+    :root { --toggle-h: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="lang-toggle">
+  <button type="button" data-lang="en">EN</button>
+  <button type="button" data-lang="vi">VI</button>
+</div>
+
+<!-- TREE VIEW -->
+<div id="view-tree">
+  <header class="page-head">
+    <h1 data-en="Family Tree" data-vi="Gia Phả">Family Tree</h1>
+    <p data-en="Direct line of ancestors" data-vi="Dòng dõi trực hệ">Direct line of ancestors</p>
+  </header>
+
+  <div class="legend-key">
+    <span class="legend-dot" aria-hidden="true"></span>
+    <span>
+      <span data-en="Indicates " data-vi="Chỉ ">Indicates </span>
+      <span class="legend-link" role="link" tabindex="0" data-nav-info="royal-surnames"
+            data-en="distinct royal generational surnames"
+            data-vi="thế hệ đế tự hoàng gia">distinct royal generational surnames</span>
+    </span>
+  </div>
+
+  <main class="tree" aria-label="Family tree"></main>
+</div>
+
+<!-- DETAIL VIEW (PERSON & INFO PAGES) -->
+<div id="view-detail" hidden>
+  <main class="detail-page">
+    <button type="button" class="back-link" id="back-btn" data-en="&larr; Back to family tree" data-vi="&larr; Về gia phả">&larr; Back to family tree</button>
+
+    <div class="detail-header">
+      <div class="icon-wrap" data-field="icon"></div>
+      <div>
+        <h1 data-field="name"></h1>
+        <span class="subtitle" data-field="title"></span>
+      </div>
+    </div>
+
+    <div class="detail-body-wrap">
+      <div class="detail-body" data-field="bio"></div>
+    </div>
+
+    <p class="not-found" hidden style="font-family: var(--sans); color: var(--ink-soft);"></p>
+  </main>
+</div>
+
+<script>
+/* Crown Icon SVG Constant */
+const CROWN_ICON_SVG = `<svg class="crown-icon" viewBox="0 0 24 24" fill="currentColor" aria-label="Direct Royal Line" title="Direct Royal Line"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg>`;
+
+/* ---------------------------------------------------------
+   INFO PAGES DATA
+--------------------------------------------------------- */
+const infoPages = {
+  "royal-surnames": {
+    name: {
+      en: "Distinct Royal Generational Surnames",
+      vi: "Thế Hệ Đế Tự Hoàng Gia"
+    },
+    title: {
+      en: "Nguyễn Imperial Naming System & Lineage",
+      vi: "Hệ thống đặt tên & quy tắc xưng danh triều Nguyễn"
+    },
+    bio: {
+      en: `<h2><span class="gender-badge badge-male">Male Lineage</span><br>Imperial Lineage & Male Naming Poems</h2>
+
+<p>In 1823, Emperor Minh Mạng created the <em>Đế hệ thi</em> (Imperial Naming Poem) and ten <em>Phiên hệ thi</em> (Princes' Naming Poems) to regulate middle names and naming conventions for subsequent male generations of the royal family.</p>
+
+<h3>The Imperial Naming Poem (Đế hệ thi)</h3>
+<p>Consisting of 20 characters intended to serve as generational middle names for the direct imperial line (hoping the dynasty would span 20 generations or ~500 years):</p>
+
+<div class="poem-box">
+  <div class="poem-hanzi">綿 洪 膺 寶 永</div>
+  <div class="poem-hanzi">保 貴 定 隆 長</div>
+  <div class="poem-hanzi">賢 能 堪 繼 述</div>
+  <div class="poem-hanzi">世 瑞 國 嘉 昌</div>
+  <div class="poem-pinyin">Miên – Hồng – Ưng – Bửu – Vĩnh<br>Bảo – Quý – Định – Long – Trường<br>Hiền – Năng – Khang – Kế – Thuật<br>Thế – Thụy – Quốc – Gia – Xương</div>
+</div>
+
+<h3>Character Meanings of the Naming Poem</h3>
+<ul class="char-meaning-list">
+  <li><span class="char-word">Miên (綿):</span> Everlasting, enduring, highest good fortune</li>
+  <li><span class="char-word">Hường / Hồng (洪):</span> Heroic and grand, building clan prestige</li>
+  <li><span class="char-word">Ưng (膺):</span> Making a name, building the nation</li>
+  <li><span class="char-word">Bửu / Bảo (寶):</span> Precious treasure, benefiting all people</li>
+  <li><span class="char-word">Vĩnh (永):</span> Unyielding resolve, celebrated heroism</li>
+  <li><span class="char-word">Bảo (保):</span> Embracing purpose, lifelong courage</li>
+  <li><span class="char-word">Quý (貴):</span> Noble and honorable, virtue accomplished</li>
+  <li><span class="char-word">Định (定):</span> Early determination, valiant execution</li>
+  <li><span class="char-word">Long (隆):</span> Imperial posture, continuing royal heritage</li>
+  <li><span class="char-word">Trường (長):</span> Eternal, continuing the family lineage</li>
+  <li><span class="char-word">Hiền (賢):</span> Talent and virtue, illuminated by ancestral blessings</li>
+  <li><span class="char-word">Năng (能):</span> Exemplary model within law and boundary</li>
+  <li><span class="char-word">Kham (堪):</span> Capable of taking responsibility, adept structure</li>
+  <li><span class="char-word">Kế (繼):</span> Strategic wisdom, fair and balanced planning</li>
+  <li><span class="char-word">Thuật (述):</span> Writing history, keeping words aligned with the people's will</li>
+  <li><span class="char-word">Thế (世):</span> Everlasting longevity, close to family and clan</li>
+  <li><span class="char-word">Thoại / Thụy (瑞):</span> Precious jade, abundant fortune and blessings</li>
+  <li><span class="char-word">Quốc (國):</span> Loved by the people, rooted in the realm</li>
+  <li><span class="char-word">Gia (嘉):</span> Countless households, the Nguyễn dynasty remains glorious</li>
+  <li><span class="char-word">Xương (昌):</span> Flourishing, peace throughout the world</li>
+</ul>
+
+<h3>The Branch Poems (Phiên hệ thi)</h3>
+<p>Ten additional poems were distributed among the collateral lines descended from his brothers across ten branches (phòng): Anh Duệ (Crown Prince Cảnh), Kiến An, Định Viễn, Diên Khánh, Điện Bàn, Thiệu Hóa, Quảng Oai, Thường Tín, Yên Khánh, and Từ Sơn.</p>
+
+<h2><span class="gender-badge badge-female">Female Lineage</span><br>Royal Female Titles & Generational Surnames</h2>
+
+<p>Women did <strong>not</strong> have a middle name linked to the words in the Imperial or Branch naming poems. Instead, their surname distinctly indicated how many generations removed they were from a Prince. For example, the title <em>Công Tôn Nữ</em> indicates that the person is a 2nd-generation descendant (granddaughter) of a Prince, or a 3rd-generation descendant (great-granddaughter) of an Emperor.</p>
+
+<div class="section-card">
+  <h3>Detailed Breakdown of Royal Female Titles</h3>
+  <div class="title-list">
+    <div class="title-item">
+      <span class="title-name">Công Nữ (公女)</span>
+      <span class="title-desc">Daughter of a Prince (Công).</span>
+    </div>
+    <div class="title-item">
+      <span class="title-name">Công Tôn Nữ (公孫女)</span>
+      <span class="title-desc">Granddaughter (2nd generation) of a Prince / Great-granddaughter (3rd generation) of an Emperor.</span>
+    </div>
+    <div class="title-item">
+      <span class="title-name">Công Tằng Tôn Nữ (公曾孫女)</span>
+      <span class="title-desc">Great-granddaughter (3rd generation) of a Prince / Great-great-granddaughter (4th generation) of an Emperor.</span>
+    </div>
+    <div class="title-item">
+      <span class="title-name">Công Huyền Tôn Nữ (公玄孫女)</span>
+      <span class="title-desc">Great-great-granddaughter (4th generation) of a Prince.</span>
+    </div>
+    <div class="title-item">
+      <span class="title-name">Tôn Nữ (孫女)</span>
+      <span class="title-desc">From the 5th generation onward, all female descendants of the Nguyễn Phúc royal line are collectively referred to as Tôn Nữ.</span>
+    </div>
+  </div>
+</div>`,
+
+      vi: `<h2><span class="gender-badge badge-male">Nam giới Hoàng tộc</span><br>Thơ Dòng Trực Hệ & Quy Tắc Đặt Tên Nam Giới</h2>
+
+<p>Năm 1823, vua Minh Mạng đã sáng tác bài <em>Đế hệ thi</em> (Thơ dòng trực hệ) và 10 bài <em>Phiên hệ thi</em> (Thơ các dòng thân vương) nhằm quy định chữ đệm và quy tắc đặt tên cho các thế hệ nam giới hậu duệ của hoàng tộc. Mỗi chữ trong bài thơ lần lượt đại diện cho một thế hệ.</p>
+
+<h3>Đế hệ thi (Dành cho dòng trực hệ)</h3>
+<p>Gồm 20 chữ được dùng làm chữ đệm thế hệ cho dòng chúa/vua nối nghiệp trực hệ (với hy vọng triều đại sẽ kéo dài 20 thế hệ, khoảng 500 năm):</p>
+
+<div class="poem-box">
+  <div class="poem-hanzi">綿 洪 膺 寶 永</div>
+  <div class="poem-hanzi">保 貴 定 隆 長</div>
+  <div class="poem-hanzi">賢 能 堪 繼 述</div>
+  <div class="poem-hanzi">世 瑞 國 嘉 昌</div>
+  <div class="poem-pinyin">Miên – Hồng – Ưng – Bửu – Vĩnh<br>Bảo – Quý – Định – Long – Trường<br>Hiền – Năng – Khang – Kế – Thuật<br>Thế – Thụy – Quốc – Gia – Xương</div>
+  <div class="poem-translation">
+    "Phúc lộc miên man, mở rộng gánh vác ngọc báu bền vững,<br>
+    Giữ gìn ngôi quý, định củng cố sự thịnh vượng lâu dài.<br>
+    Người hiền tài có khả năng gánh vác và nối nghiệp cha ông,<br>
+    Đời đời gặp điềm lành, đất nước tốt đẹp và hưng thịnh."
+  </div>
+</div>
+
+<h3>Giải nghĩa từng chữ trong bài thơ</h3>
+<ul class="char-meaning-list">
+  <li><span class="char-word">Miên:</span> Trường cửu, phước duyên trên hết</li>
+  <li><span class="char-word">Hường (Hồng):</span> Oai hùng, đúc kết thế gia</li>
+  <li><span class="char-word">Ưng:</span> Nên danh, xây dựng sơn hà</li>
+  <li><span class="char-word">Bửu (Bảo):</span> Bối báu, lợi tha quần chúng</li>
+  <li><span class="char-word">Vĩnh:</span> Bền chí, hùng anh ca tụng</li>
+  <li><span class="char-word">Bảo:</span> Ôm lòng, khí dũng bình sanh</li>
+  <li><span class="char-word">Quý:</span> Cao sang, vinh hạnh công thành</li>
+  <li><span class="char-word">Định:</span> Tiền quyết, thi hành oanh liệt</li>
+  <li><span class="char-word">Long:</span> Vương tướng, rồng tiên nối nghiệp</li>
+  <li><span class="char-word">Trường:</span> Vĩnh cửu, nối tiếp giống nòi</li>
+  <li><span class="char-word">Hiền:</span> Tài đức, phúc ấm sáng soi</li>
+  <li><span class="char-word">Năng:</span> Gương nơi khuôn phép bờ cõi</li>
+  <li><span class="char-word">Kham:</span> Đảm đương, mọi cơ cấu giỏi</li>
+  <li><span class="char-word">Kế:</span> Hoạch sách, mây khói cân phân</li>
+  <li><span class="char-word">Thuật:</span> Biên chép, lời đúng ý dân</li>
+  <li><span class="char-word">Thế:</span> Mãi thọ, cận thân gia tộc</li>
+  <li><span class="char-word">Thoại (Thụy):</span> Ngọc quý, tha hồ phước lộc</li>
+  <li><span class="char-word">Quốc:</span> Dân phục, nằm gốc giang san</li>
+  <li><span class="char-word">Gia:</span> Muôn nhà, Nguyễn vẫn huy hoàng</li>
+  <li><span class="char-word">Xương:</span> Phồn thịnh, bình an thiên hạ</li>
+</ul>
+
+<h3>Phiên hệ thi (Các bài thơ cho các dòng nhánh)</h3>
+<p>Mười bài thơ khác được phân phát cho dòng dõi các anh em của nhà vua thuộc 10 phòng (dòng nhánh): Anh Duệ (Thái tử Cảnh), Kiến An, Định Viễn, Diên Khánh, Điện Bàn, Thiệu Hóa, Quảng Oai, Thường Tín, Yên Khánh và Từ Sơn.</p>
+
+<h2><span class="gender-badge badge-female">Nữ giới Hoàng tộc</span><br>Quy Tắc Xưng Danh & Danh Xưng Nữ Giới</h2>
+
+<p>Phụ nữ <strong>không</strong> có tên đệm gắn liền với các từ trong bài thơ [Đế hệ thi hay Phiên hệ thi]. Thay vào đó, họ tộc của họ sẽ chỉ rõ họ là cháu mấy đời của một vị Thân vương. Ví dụ, danh xưng <em>Công Tôn Nữ</em> cho biết người này là cháu 2 đời (cháu nội) của một Thân vương, hoặc là cháu 3 đời (chắt) của một vị Hoàng đế.</p>
+
+<div class="section-card">
+  <h3>Bảng giải thích chi tiết xưng danh nữ giới hoàng tộc</h3>
+  <div class="title-list">
+    <div class="title-item">
+      <span class="title-name">Công nữ (公女)</span>
+      <span class="title-desc">Con gái của Thân vương (Công).</span>
+    </div>
+    <div class="title-item">
+      <span class="title-name">Công Tôn nữ (公孫女)</span>
+      <span class="title-desc">Cháu nội (2 đời) của Thân vương / Chắt (3 đời) của Hoàng đế.</span>
+    </div>
+    <div class="title-item">
+      <span class="title-name">Công Tằng Tôn nữ (公曾孫女)</span>
+      <span class="title-desc">Chắt (3 đời) của Thân vương / Chút (4 đời) của Hoàng đế.</span>
+    </div>
+    <div class="title-item">
+      <span class="title-name">Công Huyền Tôn nữ (公玄孫女)</span>
+      <span class="title-desc">Chút (4 đời) của Thân vương.</span>
+    </div>
+    <div class="title-item">
+      <span class="title-name">Tôn Nữ (孫女)</span>
+      <span class="title-desc">Từ thế hệ thứ 5 trở đi, tất cả nữ giới thuộc dòng dõi Tôn thất Nguyễn Phúc đều gọi chung là Tôn Nữ.</span>
+    </div>
+  </div>
+</div>`
+    }
+  }
+};
+
+/* ---------------------------------------------------------
+   DATA
+--------------------------------------------------------- */
+const familyTree = [
+  { note: "Generation -1", people: [
+    { id: "gia-long", gender: "male", isRoyalDirectLine: true, name: "Gia Long", placeholder: null,
+      title: { en: "Founder & 1st Emperor of Nguyễn Dynasty", vi: "Hoàng Đế Khai Quốc Triều Nguyễn" },
+      bio: { en: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Personal Name</span><span class="meta-value">Nguyễn Phúc Ánh (阮福映)</span></div>
+  <div class="meta-item"><span class="meta-label">Reign</span><span class="meta-value">1802 – 1820</span></div>
+  <div class="meta-item"><span class="meta-label">Life Span</span><span class="meta-value">1762 – 1820 (58 years)</span></div>
+  <div class="meta-item"><span class="meta-label">Capital</span><span class="meta-value">Phú Xuân (Huế)</span></div>
+</div>
+
+<h2>Dynastic Unification</h2>
+<p>Emperor Gia Long was the founder of the Nguyễn Dynasty, Vietnam's final imperial ruling house. After surviving the destruction of the Nguyễn lords during the devastating Tây Sơn Rebellion, he waged a quarter-century struggle to reclaim his heritage. In 1802, he unified the nation's northern and southern territories under a single sovereign authority for the first time in centuries.</p>
+
+<h2>Key Historical Achievements</h2>
+<ul>
+  <li><strong>Naming of the Nation:</strong> Officially established the country's name as <em>Việt Nam</em> (越南) in 1804.</li>
+  <li><strong>Territorial Integrity:</strong> Consolidated sovereignty spanning from the northern border down to the Cà Mau peninsula and established formal administration over the Hoàng Sa (Paracel) islands.</li>
+  <li><strong>Legal Code:</strong> Promulgated the <em>Hoàng Việt luật lệ</em> (Gia Long Code), establishing a centralized administrative and legal framework.</li>
+  <li><strong>Imperial Capital:</strong> Relocated the national capital to Phú Xuân (Huế) and initiated the construction of the Citadel.</li>
+</ul>
+
+<h2>Siblings</h2>
+
+<h3>Brothers (5)</h3>
+<ul>
+  <li>Nguyễn Phúc Hạo – Eldest brother (born to Nguyễn Phúc Luân's primary wife / elder sister of Nguyễn Thị Hoàn); died early</li>
+  <li>Nguyễn Phúc Mân – Second brother; died during the Tây Sơn rebellion</li>
+  <li>Nguyễn Phúc Đồng – Elder brother born to Lady Nguyễn Thị Hoàn; died fighting the Tây Sơn forces</li>
+  <li><em>(Gia Long / Nguyễn Phúc Ánh was the 3rd son)</em></li>
+  <li>Nguyễn Phúc Điển – Younger brother born to Lady Nguyễn Thị Hoàn; died during the Tây Sơn conflict</li>
+  <li>Unnamed Son – Half-brother who died in infancy</li>
+</ul>
+
+<h3>Sisters (4)</h3>
+<ul>
+  <li>Nguyễn Phúc Ngọc Du (Princess Tuyên Hòa) – Half-sister; married General Võ Tánh</li>
+  <li>Nguyễn Phúc Ngọc Tuyền – Half-sister</li>
+  <li>Nguyễn Phúc Ngọc Tú (Princess Long Thành) – Full sister (born to Lady Nguyễn Thị Hoàn)</li>
+  <li>Nguyễn Phúc Ngọc Uyển – Half-sister (born to Lady Tống Thị Diên)</li>
+</ul>
+
+<p><strong>Historical Context:</strong> Many of Gia Long's brothers and male relatives were targeted, captured, or died in battle during the fierce 25-year conflict with the Tây Sơn brothers, leaving Gia Long as the primary surviving line to restore the dynasty.</p>`,
+
+        vi: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Tên Khai Sinh</span><span class="meta-value">Nguyễn Phúc Ánh (阮福映)</span></div>
+  <div class="meta-item"><span class="meta-label">Trị Vì</span><span class="meta-value">1802 – 1820</span></div>
+  <div class="meta-item"><span class="meta-label">Sinh / Mất</span><span class="meta-value">1762 – 1820 (Thọ 58 tuổi)</span></div>
+  <div class="meta-item"><span class="meta-label">Kinh Đô</span><span class="meta-value">Phú Xuân (Huế)</span></div>
+</div>
+
+<h2>Thống Nhất Đế Chế</h2>
+<p>Hoàng đế Gia Long là vị vua khai quốc của triều đại nhà Nguyễn, triều đại phong kiến cuối cùng trong lịch sử Việt Nam. Sau khi sống sót qua biến cố sụp đổ của các Chúa Nguyễn trong phong trào Tây Sơn, ông đã trải qua hơn một phần tư thế kỷ gian khổ để khôi phục cơ nghiệp. Năm 1802, ông chính thức thống nhất hai miền Nam - Bắc dưới một vương triều tập trung duy nhất.</p>
+
+<h2>Thành Tựu Lịch Sử Nổi Bật</h2>
+<ul>
+  <li><strong>Quốc Hiệu Việt Nam:</strong> Chính thức ấn định quốc hiệu đất nước là <em>Việt Nam</em> (越南) vào năm 1804.</li>
+  <li><strong>Chủ Quyền Lãnh Thổ:</strong> Củng cố toàn vẹn lãnh thổ kéo dài từ biên giới phía Bắc đến tận mũi Cà Mau và thiết lập bộ máy quản lý chính thức tại quần đảo Hoàng Sa.</li>
+  <li><strong>Bộ Luật Gia Long:</strong> Ban hành <em>Hoàng Việt luật lệ</em> (Bộ luật Gia Long), tạo nền tảng pháp lý và hành chính tập quyền cho đất nước.</li>
+  <li><strong>Xây Dựng Kinh Đô:</strong> Dời đô về Phú Xuân (Huế) và khởi công quy hoạch, xây dựng Kinh thành Huế.</li>
+</ul>
+
+<h2>Anh Chị Em Cùng Thế Hệ</h2>
+
+<h3>Anh Em Trai (5)</h3>
+<ul>
+  <li>Nguyễn Phúc Hạo – Anh cả (con của chính thất Nguyễn Phúc Luân / chị gái Bà Quốc mẫu Nguyễn Thị Hoàn); mất sớm</li>
+  <li>Nguyễn Phúc Mân – Anh thứ hai; hy sinh trong biến cố Tây Sơn</li>
+  <li>Nguyễn Phúc Đồng – Anh trai cùng mẹ (Bà Nguyễn Thị Hoàn); hy sinh khi chiến đấu với quân Tây Sơn</li>
+  <li><em>(Vua Gia Long / Nguyễn Phúc Ánh là hoàng tử thứ 3)</em></li>
+  <li>Nguyễn Phúc Điển – Em trai cùng mẹ (Bà Nguyễn Thị Hoàn); hy sinh trong thời kỳ xung đột Tây Sơn</li>
+  <li>Con trai chưa đặt tên – Em cùng cha khác mẹ, mất khi còn nhỏ</li>
+</ul>
+
+<h3>Chị Em Gái (4)</h3>
+<ul>
+  <li>Nguyễn Phúc Ngọc Du (Tuyên Hòa Công chúa) – Chị em cùng cha khác mẹ; thành hôn với Danh tướng Võ Tánh</li>
+  <li>Nguyễn Phúc Ngọc Tuyền – Chị em cùng cha khác mẹ</li>
+  <li>Nguyễn Phúc Ngọc Tú (Long Thành Công chúa) – Chị em cùng mẹ (Bà Nguyễn Thị Hoàn)</li>
+  <li>Nguyễn Phúc Ngọc Uyển – Chị em cùng cha khác mẹ (con của Bà Tống Thị Diên)</li>
+</ul>
+
+<p><strong>Bối cảnh lịch sử:</strong> Nhiều anh em trai và người thân nam giới của vua Gia Long đã bị truy bắt, bắt giữ hoặc hy sinh trên chiến trường trong suốt 25 năm nội chiến khốc liệt với nhà Tây Sơn, khiến vua Gia Long trở thành dòng dõi sống sót chính để khôi phục vương triều.</p>` } },
+    { id: "tran-thi-dang", gender: "female", isRoyalDirectLine: false, name: "Trần Thị Đang", placeholder: null,
+      title: { en: "Empress", vi: "Hoàng hậu" },
+      bio: { en: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Personal Name</span><span class="meta-value">Trần Thị Đang (陳氏璫) / Kinh (敬)</span></div>
+  <div class="meta-item"><span class="meta-label">Life Span</span><span class="meta-value">Jan 4, 1769 – Nov 6, 1846 (77 years)</span></div>
+  <div class="meta-item"><span class="meta-label">Spouse</span><span class="meta-value">Emperor Gia Long</span></div>
+  <div class="meta-item"><span class="meta-label">Parents</span><span class="meta-value">Trần Hưng Đạt & Lady Lê Thị Cầm</span></div>
+  <div class="meta-item"><span class="meta-label">Tomb Location</span><span class="meta-value">Lăng Thiên Thọ Hữu, Huế</span></div>
+  <div class="meta-item"><span class="meta-label">Honors & Titles</span><span class="meta-value">Empress Thuận Thiên, Grand Empress Dowager</span></div>
+</div>
+
+<p>Empress Thuận Thiên (born Trần Thị Đang, 1769–1846) was one of the most prestigious and influential figures in the Nguyễn Dynasty's imperial harem. As a wife who stood by Nguyễn Ánh (later Emperor Gia Long) through the hardships of the Tây Sơn civil war, she gave birth to Prince Nguyễn Phúc Đảm, who later ascended the throne as Emperor Minh Mạng. Renowned for her frugality, virtue, and wisdom, she presided over the imperial harem for 32 years across the reigns of three emperors (Gia Long, Minh Mạng, and Thiệu Trị), holding the titles of Empress Dowager and Grand Empress Dowager. Beyond offering spiritual support, she actively guided emperors to care for the common people, practice moderation, and uphold state laws, while enjoying the rare royal blessing of living to see five generations of her family under one roof before passing away at the age of 77.</p>`,
+        vi: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Tên Húy</span><span class="meta-value">Trần Thị Đang (陳氏璫) / Kinh (敬)</span></div>
+  <div class="meta-item"><span class="meta-label">Sinh / Mất</span><span class="meta-value">04/01/1769 – 06/11/1846 (Thọ 77 tuổi)</span></div>
+  <div class="meta-item"><span class="meta-label">Phu Quân</span><span class="meta-value">Hoàng đế Gia Long</span></div>
+  <div class="meta-item"><span class="meta-label">Thân Phụ / Mẫu</span><span class="meta-value">Trần Hưng Đạt & Bà Lê Thị Cầm</span></div>
+  <div class="meta-item"><span class="meta-label">An Táng</span><span class="meta-value">Lăng Thiên Thọ Hữu, Huế</span></div>
+  <div class="meta-item"><span class="meta-label">Tôn Hiệu / Thụy Hiệu</span><span class="meta-value">Thuận Thiên Cao Hoàng hậu, Thái hoàng thái hậu</span></div>
+</div>
+
+<p>Thuận Thiên Cao Hoàng hậu (tên thật là Trần Thị Đang, 1769–1846) là một trong những nhân vật có vị thế cao quý và ảnh hưởng sâu rộng nhất trong hậu cung nhà Nguyễn. Là người vợ gắn bó với Nguyễn Ánh (sau là vua Gia Long) từ thời kỳ bấp bênh gian khổ của cuộc nội chiến Tây Sơn, bà đã hạ sinh Hoàng tử Nguyễn Phúc Đảm - người sau này nối ngôi trở thành vua Minh Mạng. Nhờ tính cách cần kiệm, hiền đức và trí tuệ, bà giữ vị trí đứng đầu hậu cung suốt 32 năm qua ba đời vua (Gia Long, Minh Mạng, Thiệu Trị) với các tôn hiệu Hoàng thái hậu rồi Thái hoàng thái hậu. Bà không chỉ là điểm tựa tinh thần gia đình, luôn răn dạy các vua chốn triều chính phải thương dân, tiết kiệm, giữ gìn phép nước, mà còn trải qua niềm hạnh phúc hiếm có trong lịch sử hoàng gia khi chứng kiến cảnh "ngũ đại đồng đường" trước khi qua đời ở tuổi 77.</p>` } }
+  ]},
+  { note: "Generation 0", people: [
+    { id: "minh-mang", gender: "male", isRoyalDirectLine: true, name: "Minh Mạng", placeholder: null,
+      title: { en: "2nd Emperor of Nguyễn Dynasty", vi: "Hoàng Đế Thứ Hai Triều Nguyễn" },
+      bio: { en: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Personal Name</span><span class="meta-value">Nguyễn Phúc Đảm (阮福膽)</span></div>
+  <div class="meta-item"><span class="meta-label">Reign</span><span class="meta-value">1820 – 1841</span></div>
+  <div class="meta-item"><span class="meta-label">Life Span</span><span class="meta-value">1791 – 1841 (49 years)</span></div>
+  <div class="meta-item"><span class="meta-label">Temple Name</span><span class="meta-value">Thánh Tổ (聖祖)</span></div>
+</div>
+
+<h2>Administrative Reform & Governance</h2>
+<p>Emperor Minh Mạng was the second ruler of the Nguyễn Dynasty and the primary architect of the imperial administrative state. Renowned for his tireless work ethic, administrative brilliance, and deep Confucian principles, he transformed Vietnam into one of the most powerful and highly structured empires in Southeast Asia during the 19th century.</p>
+
+<h2>Major Contributions</h2>
+<ul>
+  <li><strong>Provincial Restructuring:</strong> Abolished Autonomous Regional Viceroys (Bắc Thành & Gia Định Thành) in 1831–1832, dividing the nation into 31 administrative provinces governed directly by imperial appointees.</li>
+  <li><strong>Dynastic Lineage System:</strong> Authored the <em>Đế Hệ Thi</em> (Imperial Naming Poem) and rules for generational naming to ensure structured royal succession for future generations.</li>
+  <li><strong>Institutional Expansion:</strong> Founded the <em>Nội Các</em> (Grand Secretariat) and expanded royal examinations to elevate bureaucratic competence.</li>
+  <li><strong>Territorial Projection:</strong> Renamed the empire <em>Đại Nam</em> (大南) in 1838 and asserted significant regional influence across Indochina.</li>
+</ul>
+
+<h2>Siblings</h2>
+
+<h3>Brothers (12)</h3>
+<ul>
+  <li>Nguyễn Phúc Cảnh (Crown Prince Cảnh) – First son</li>
+  <li>Nguyễn Phúc Hy – Second son</li>
+  <li>Nguyễn Phúc Tấn – Third son (died in infancy)</li>
+  <li><em>(Minh Mạng / Nguyễn Phúc Đảm was the 4th son)</em></li>
+  <li>Nguyễn Phúc Đài (Prince of Kiến An)</li>
+  <li>Nguyễn Phúc Bính (Prince of Định Viễn / Định遠)</li>
+  <li>Nguyễn Phúc Tấn (Prince of Diên Khánh)</li>
+  <li>Nguyễn Phúc Phổ (Prince of Điện Bàn)</li>
+  <li>Nguyễn Phúc Chẩn (Prince of Thiệu Hóa)</li>
+  <li>Nguyễn Phúc Cự (Prince of Quảng Oai / Quảng Uy / Quảng威)</li>
+  <li>Nguyễn Phúc Mão (Prince of Từ Sơn)</li>
+  <li>Nguyễn Phúc Quang – Died early</li>
+  <li>Nguyễn Phúc Kỳ – Died early</li>
+</ul>
+
+<h3>Sisters (18)</h3>
+<ul>
+  <li>Nguyễn Phúc Ngọc Châu (Princess Bình Hòa)</li>
+  <li>Nguyễn Phúc Ngọc Quỳnh (Princess Bình Thạnh)</li>
+  <li>Nguyễn Phúc Ngọc Anh (Princess An Thái)</li>
+  <li>Nguyễn Phúc Ngọc Trân (Princess Trân Thuận)</li>
+  <li>Nguyễn Phúc Ngọc Trinh (Princess Bảo Lộc)</li>
+  <li>Nguyễn Phúc Ngọc Ngoạn</li>
+  <li>Nguyễn Phúc Ngọc Nga (Princess An Hòa)</li>
+  <li>Nguyễn Phúc Ngọc Cửu</li>
+  <li>Nguyễn Phúc Ngọc Nguyệt</li>
+  <li>Nguyễn Phúc Ngọc Bích</li>
+  <li>Nguyễn Phúc Ngọc Tường</li>
+  <li>Nguyễn Phúc Ngọc Mẫn</li>
+  <li>Nguyễn Phúc Ngọc Khuê</li>
+  <li>Nguyễn Phúc Ngọc Cơ</li>
+  <li>Nguyễn Phúc Ngọc Thiểu</li>
+  <li>Nguyễn Phúc Ngọc Lý</li>
+  <li>Nguyễn Phúc Ngọc Thành</li>
+  <li>Nguyễn Phúc Ngọc Triệu</li>
+</ul>`,
+
+        vi: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Tên Khai Sinh</span><span class="meta-value">Nguyễn Phúc Đảm (阮福膽)</span></div>
+  <div class="meta-item"><span class="meta-label">Trị Vì</span><span class="meta-value">1820 – 1841</span></div>
+  <div class="meta-item"><span class="meta-label">Sinh / Mất</span><span class="meta-value">1791 – 1841 (Thọ 49 tuổi)</span></div>
+  <div class="meta-item"><span class="meta-label">Miếu Hiệu</span><span class="meta-value">Thánh Tổ (聖祖)</span></div>
+</div>
+
+<h2>Cải Cách Hành Chính & Triết Lý Trị Quốc</h2>
+<p>Hoàng đế Minh Mạng là vị vua thứ hai của triều Nguyễn và là kiến trúc sư trưởng của nhà nước phong kiến tập quyền Việt Nam. Nổi tiếng với tinh thần làm việc mẫn cán, tư duy quản lý kiệt xuất và nền tảng Nho học sâu sắc, ông đã đưa đất nước phát triển thành một đế chế hùng mạnh và tổ chức quy củ hàng đầu Đông Nam Á vào thế kỷ 19.</p>
+
+<h2>Cống Hiến Lịch Sử Trọng Tâm</h2>
+<ul>
+  <li><strong>Bãi Bỏ Tổng Trấn & Chia Tỉnh:</strong> Cải cách hành chính quy mô toàn quốc (1831–1832), xóa bỏ Bắc Thành và Gia Định Thành, chia cả nước thành 31 tỉnh dưới sự quản lý trực tiếp của triều đình.</li>
+  <li><strong>Hệ Thống Đặt Tên Hoàng Tộc:</strong> Sáng tác bài <em>Đế Hệ Thi</em> và thiết lập quy tắc đặt tên thế hệ nhằm giữ gìn trật tự dòng dõi hoàng tộc lâu dài.</li>
+  <li><strong>Củng Cố Bộ Máy Nhà Nước:</strong> Thành lập <em>Nội Các</em>, mở rộng các kỳ thi Khoa cử để tuyển chọn nhân tài và hoàn thiện cơ cấu quản lý hành chính.</li>
+  <li><strong>Mở Rộng Vị Thế Quốc Gia:</strong> Đổi quốc hiệu thành <em>Đại Nam</em> (大南) vào năm 1838 và khẳng định thế lực ảnh hưởng lớn tại khu vực Đông Dương.</li>
+</ul>
+
+<h2>Anh Chị Em Cùng Thế Hệ</h2>
+
+<h3>Anh Em Trai (12)</h3>
+<ul>
+  <li>Nguyễn Phúc Cảnh (Anh Duệ Hoàng thái tử) – Hoàng tử thứ nhất</li>
+  <li>Nguyễn Phúc Hy – Hoàng tử thứ hai</li>
+  <li>Nguyễn Phúc Tấn – Hoàng tử thứ ba (mất sớm)</li>
+  <li><em>(Vua Minh Mạng / Nguyễn Phúc Đảm là hoàng tử thứ 4)</em></li>
+  <li>Nguyễn Phúc Đài (Kiến An Vương)</li>
+  <li>Nguyễn Phúc Bính (Định Viễn Công / Định遠)</li>
+  <li>Nguyễn Phúc Tấn (Diên Khánh Vương)</li>
+  <li>Nguyễn Phúc Phổ (Điện Bàn Công)</li>
+  <li>Nguyễn Phúc Chẩn (Thiệu Hóa Quận Vương)</li>
+  <li>Nguyễn Phúc Cự (Quảng Oai Công / Quảng Uy / Quảng威)</li>
+  <li>Nguyễn Phúc Mão (Từ Sơn Công)</li>
+  <li>Nguyễn Phúc Quang – Mất sớm</li>
+  <li>Nguyễn Phúc Kỳ – Mất sớm</li>
+</ul>
+
+<h3>Chị Em Gái (18)</h3>
+<ul>
+  <li>Nguyễn Phúc Ngọc Châu (Bình Hòa Công chúa)</li>
+  <li>Nguyễn Phúc Ngọc Quỳnh (Bình Thạnh Công chúa)</li>
+  <li>Nguyễn Phúc Ngọc Anh (An Thái Công chúa)</li>
+  <li>Nguyễn Phúc Ngọc Trân (Trân Thuận Công chúa)</li>
+  <li>Nguyễn Phúc Ngọc Trinh (Bảo Lộc Công chúa)</li>
+  <li>Nguyễn Phúc Ngọc Ngoạn</li>
+  <li>Nguyễn Phúc Ngọc Nga (An Hòa Công chúa)</li>
+  <li>Nguyễn Phúc Ngọc Cửu</li>
+  <li>Nguyễn Phúc Ngọc Nguyệt</li>
+  <li>Nguyễn Phúc Ngọc Bích</li>
+  <li>Nguyễn Phúc Ngọc Tường</li>
+  <li>Nguyễn Phúc Ngọc Mẫn</li>
+  <li>Nguyễn Phúc Ngọc Khuê</li>
+  <li>Nguyễn Phúc Ngọc Cơ</li>
+  <li>Nguyễn Phúc Ngọc Thiểu</li>
+  <li>Nguyễn Phúc Ngọc Lý</li>
+  <li>Nguyễn Phúc Ngọc Thành</li>
+  <li>Nguyễn Phúc Ngọc Triệu</li>
+</ul>` } },
+    { id: "nguyen-thi-thuy-truc", gender: "female", isRoyalDirectLine: false, name: "Nguyễn Thị Thúy Trúc", placeholder: null,
+      title: { en: "Fifth-Rank Imperial Consort", vi: "Ngũ giai Lệ tần" },
+      bio: { en: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Personal Name / Alias</span><span class="meta-value">Nguyễn Thị Thúy Trúc (阮氏翠竹) / Điện (電)</span></div>
+  <div class="meta-item"><span class="meta-label">Origin</span><span class="meta-value">Bình Sơn District, Quảng Ngãi Province</span></div>
+  <div class="meta-item"><span class="meta-label">Spouse</span><span class="meta-value">Emperor Minh Mạng</span></div>
+  <div class="meta-item"><span class="meta-label">Father</span><span class="meta-value">Nguyễn Gia Quý (Vice-Commander)</span></div>
+  <div class="meta-item"><span class="meta-label">Tomb Location</span><span class="meta-value">Trầm Bái, Thủy Xuân, Huế</span></div>
+  <div class="meta-item"><span class="meta-label">Posthumous Name</span><span class="meta-value">Thục Tắc (淑則)</span></div>
+</div>
+
+<p>Nguyễn Thị Thúy Trúc (Chinese characters: 阮氏翠竹; birth and death dates unknown), also known by the personal name Điện (電), held the rank of Fifth-Rank Concubine Lệ Tần (五階麗嬪) under Emperor Minh Mạng. She was born in Bình Sơn District, Quảng Ngãi Province, the daughter of Nguyễn Gia Quý, who held the military rank of Vice-Commander. Historical records do not specify whether she entered the emperor's service before or after his accession to the throne. In 1838, the 19th year of Minh Mạng's reign, she was formally conferred the title of Fifth-Rank Concubine Lệ Tần. Her date of death is unrecorded, but upon her passing she was bestowed the posthumous name Thục Tắc. Her tomb is located in the Trầm Bái area, now part of Thủy Xuân Ward, Huế, near the tombs of her two daughters, Princesses Trinh Nhàn and Nhu Nghi.</p>
+<p>According to local folklore, Concubine Lệ Tần originally came from a commoner background. During a royal inspection tour by Emperor Minh Mạng, the local populace parted to make way for the royal procession, but a young woman holding a sickle for cutting grass remained indifferent and refused to step aside. Surprised, the emperor ordered his guards to bring her forward for questioning, and she answered with a poem:</p>
+<blockquote class="quote-poem-block">"You ride grandly in your sedan chair, while I hold the crescent blade to guard the border."</blockquote>
+<p>Seeing that she was beautiful, articulate, and possessed a charmingly stubborn demeanor, the emperor was moved to bring her into the imperial court, later promoting her to Fifth-Rank Concubine Lệ Tần.</p>
+
+<p>Concubine Lệ Tần bore Emperor Minh Mạng six princes and two princesses, all of whom survived into adulthood:</p>
+<h2>Princes</h2>
+<ul>
+<li>Prince Miên Lương (Feb 27, 1826 – Aug 24, 1863), Sơn Tĩnh Quận Công, the 31st prince</li>
+<li>Prince Miên Kháp (Oct 5, 1828 – Jul 14, 1893), Tuy An Quận Công, the 41st prince</li>
+<li>Prince Miên Lâm (Jan 20, 1832 – Dec 28, 1897), Hoài Đức Quận Vương, the 57th prince</li>
+<li><span class="highlight-auburn">Prince Miên Chí (Sep 20, 1836 – Dec 18, 1888), Vĩnh Lộc Quận Công, the 73rd prince</span></li>
+<li>Prince Miên Bàng (Jun 5, 1838 – Aug 19, 102), An Xuyên Vương, the 76th prince</li>
+<li>Prince Miên Lịch (May 13, 1841 – Nov 5, 1919), An Thành Vương, the 78th and youngest prince, born after the emperor's death</li>
+</ul>
+<h2>Princesses</h2>
+<ul>
+<li>Princess Trinh Nhàn (Jun 14, 1827 – Jul 28, 102), Nghĩa Điền Công Chúa, the 26th princess</li>
+<li>Princess Nhu Nghi (Nov 22, 1833 – 1929), Xuân Lai Công Chúa, the 44th princess and the longest-surviving of all Emperor Minh Mạng's children</li>
+</ul>`,
+
+        vi: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Tên Húy</span><span class="meta-value">Nguyễn Thị Thúy Trúc (阮氏翠竹) / Điện (電)</span></div>
+  <div class="meta-item"><span class="meta-label">Nguyên Quán</span><span class="meta-value">Huyện Bình Sơn, tỉnh Quảng Ngãi</span></div>
+  <div class="meta-item"><span class="meta-label">Phu Quân</span><span class="meta-value">Hoàng đế Minh Mạng</span></div>
+  <div class="meta-item"><span class="meta-label">Thân Phụ</span><span class="meta-value">Nguyễn Gia Quý (Phó Vệ úy)</span></div>
+  <div class="meta-item"><span class="meta-label">An Táng</span><span class="meta-value">Trầm Bái, phường Thủy Xuân, Huế</span></div>
+  <div class="meta-item"><span class="meta-label">Thụy Hiệu / Phong Hiệu</span><span class="meta-value">Thục Tắc / Ngũ giai Lệ tần</span></div>
+</div>
+
+<p>Nguyễn Thị Thúy Trúc (chữ Hán: 阮氏翠竹; không rõ ngày tháng năm sinh, năm mất), còn có húy là Điện (電), phong hiệu Ngũ giai Lệ tần (五階麗嬪), là một cung tần của vua Minh Mạng nhà Nguyễn. Bà nguyên quán ở huyện Bình Sơn, tỉnh Quảng Ngãi. Phụ thân của bà là ông Nguyễn Gia Quý, giữ chức Phó Vệ úy. Thời gian bà vào hầu vua Minh Mạng từ lúc tiềm để hay sau khi đăng cơ đều không được sử sách ghi lại. Năm Minh Mạng thứ 19 (1838), bà được sắc phong làm Ngũ giai Lệ tần. Không rõ thời gian bà qua đời; khi mất, bà được ban thụy là Thục Tắc. Tẩm mộ của bà được táng tại khu vực Trầm Bái, nay thuộc địa phận phường Thủy Xuân, Huế. Gần đó là tẩm của hai bà công chúa Trinh Nhàn và Nhu Nghi, hai người con gái của bà.</p>
+<p>Theo truyền thuyết dân gian kể lại, bà Lệ tần vốn xuất thân bình dân. Nhân một năm vua Minh Mạng đi tuần du, dân chúng thấy ngự giá đi qua đều dạt ra xa để tránh đường, duy chỉ một người con gái cầm liềm cắt cỏ vẫn dửng dưng không chịu tránh đường. Nhà vua lấy làm lạ, cho thị vệ bắt cô gái đó đến xét hỏi. Cô gái bèn than rằng:</p>
+<blockquote class="quote-poem-block">"Chàng đi võng giá nghênh ngang, Thiếp cầm bán nguyệt giữ an cõi bờ."</blockquote>
+<p>Nhà vua nhìn kỹ thấy cô gái rất đẹp, ăn nói có duyên, có vẻ bướng bỉnh dễ thương nên động lòng cho nạp vào cung và thăng làm Lệ tần ở hàng Ngũ giai.</p>
+
+<p>Bà Lệ tần sinh cho vua Minh Mạng tổng cộng 6 hoàng tử và 2 hoàng nữ, tất cả đều sống qua tuổi trưởng thành:</p>
+<h2>Hoàng tử</h2>
+<ul>
+<li>Sơn Tĩnh Quận công Nguyễn Phúc Miên Lương (27/2/1826 – 24/8/1863), hoàng tử thứ 31</li>
+<li>Tuy An Quận công Nguyễn Phúc Miên Kháp (5/10/1828 – 14/7/1893), hoàng tử thứ 41</li>
+<li>Hoài Đức Quận vương Nguyễn Phúc Miên Lâm (20/1/1832 – 28/12/1897), hoàng tử thứ 57</li>
+<li><span class="highlight-auburn">Vĩnh Lộc Quận công Nguyễn Phúc Miên Chí (20/9/1836 – 18/12/1888), hoàng tử thứ 73</span></li>
+<li>An Xuyên vương Nguyễn Phúc Miên Bàng (5/6/1838 – 19/8/1902), hoàng tử thứ 76</li>
+<li>An Thành vương Nguyễn Phúc Miên Lịch (13/5/1841 – 5/11/1919), hoàng tử thứ 78 và cũng là hoàng tử út, chào đời sau khi vua cha đã mất</li>
+</ul>
+<h2>Hoàng nữ</h2>
+<ul>
+<li>Nghĩa Điền Công chúa Nguyễn Phúc Trinh Nhàn (14/6/1827 – 28/7/1902), hoàng nữ thứ 26</li>
+<li>Xuân Lai Công chúa Nguyễn Phúc Nhu Nghi (22/11/1833 – 1929), hoàng nữ thứ 44, người sống thọ nhất trong số những người con của vua Minh Mạng</li>
+</ul>` } }
+  ]},
+  { note: "Generation 1 (Miên)", people: [
+    { id: "nguyen-phuc-mien-chi", gender: "male", isRoyalDirectLine: true, name: "Nguyễn Phúc <span class=\"gen-marker\">Miên</span> Chí", placeholder: null,
+      title: { en: "Prince", vi: "Hoàng tử" },
+      bio: { en: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Personal Name</span><span class="meta-value">Nguyễn Phúc Miên Chí (阮福綿寘)</span></div>
+  <div class="meta-item"><span class="meta-label">Noble Title</span><span class="meta-value">Vĩnh Lộc Quận Công (永祿郡公)</span></div>
+  <div class="meta-item"><span class="meta-label">Life Span</span><span class="meta-value">Sep 20, 1836 – Dec 18, 1888 (52 years)</span></div>
+  <div class="meta-item"><span class="meta-label">Posthumous Name</span><span class="meta-value">Cung Lượng (恭亮)</span></div>
+  <div class="meta-item"><span class="meta-label">Parents</span><span class="meta-value">Emperor Minh Mạng & Consort Lệ Tần</span></div>
+  <div class="meta-item"><span class="meta-label">Offspring</span><span class="meta-value">13 Sons, 18 Daughters</span></div>
+</div>
+
+<h2>Early Life & Education</h2>
+<p>Prince Nguyễn Phúc Miên Chí (also rendered as Trí, Chinese characters: 阮福綿寘) was born on September 20, 1836 (the 10th day of the 8th lunar month in the year Bính Thân), as the 73rd son of Emperor Minh Mạng and the 6th child of Fifth-Rank Consort Lệ Tần (Nguyễn Thị Thúy Trúc). Growing up in his private residence, Prince Miên Chí studied classical histories and literature, acquiring a broad understanding of the classics.</p>
+
+<h2>Royal Imperial Favors & Ennoblement</h2>
+<p>In 1840 (the 21st year of Minh Mạng's reign), the Emperor commissioned gold animal figurines as gifts for the imperial princes. Prince Miên Chí was awarded a golden elephant weighing 3 taels and 2 mace.</p>
+<p>In 1852 (the 5th year of Tự Đức's reign), he was officially ennobled as <strong>Vĩnh Lộc Quận Công</strong> (District Duke of Vĩnh Lộc).</p>
+
+<h2>Incidents during Tự Đức's Reign</h2>
+<p>In 1875 (the 28th year of Tự Đức's reign), District Duke Miên Chí borrowed 1,000 strings of cash (quan tiền) from the Nghĩa Thường public treasury to repair his residence, but spent it all within a month and requested an advance on 2 to 3 years of his salary. Miên Định, head of the Imperial Clan Court (Phủ Tôn Nhân) and Miên Chí's 3rd older brother, reported the matter to Emperor Tự Đức to prevent further negligence. The Emperor remarked that while ordinary people might be forgiven for lacking parental guidance, a royal prince must discipline himself to set an example for others, ordering that he be properly admonished.</p>
+
+<p>Later, his second son with his secondary wife, Prince Hồng Cạnh (who had inherited the title <em>Kỳ ngoại hầu</em>), engaged in unauthorized financial transactions with an interpreter at the French Consulate. The Imperial Clan Court reported this to Emperor Tự Đức; consequently, Hồng Cạnh received 80 strokes of the cane, and District Duke Miên Chí was penalized with the forfeiture of one year's royal stipend.</p>
+
+<h2>Lineage & Passing</h2>
+<p>District Duke Miên Chí passed away on December 18, 1888 (the 16th day of the 11th lunar month in the 3rd year of Đồng Khánh's reign) at the age of 52. He was posthumously granted the title <strong>Cung Lượng</strong> (恭亮). His tomb is located on the northeastern slope of Ngự Bình Mountain (An Cựu Ward, Huế), while his ancestral shrine was established in An Quán Village (Hương Trà, Huế).</p>
+<p>He was blessed with 13 sons and 18 daughters. His branch of the family was granted the character <em>Lập</em> (立) by Emperor Minh Mạng for naming subsequent generations.</p>
+
+<h2>Siblings</h2>
+<h3>Brothers (5)</h3>
+<ul>
+  <li>Prince Miên Lương (Feb 27, 1826 – Aug 24, 1863), Sơn Tĩnh Quận Công – 31st prince</li>
+  <li>Prince Miên Kháp (Oct 5, 1828 – Jul 14, 1893), Tuy An Quận Công – 41st prince</li>
+  <li>Prince Miên Lâm (Jan 20, 1832 – Dec 28, 1897), Hoài Đức Quận Vương – 57th prince</li>
+  <li>Prince Miên Bàng (Jun 5, 1838 – Aug 19, 1902), An Xuyên Vương – 76th prince</li>
+  <li>Prince Miên Lịch (May 13, 1841 – Nov 5, 1919), An Thành Vương – 78th and youngest prince, born after the emperor's death</li>
+</ul>
+<h3>Sisters (2)</h3>
+<ul>
+  <li>Princess Trinh Nhàn (Jun 14, 1827 – Jul 28, 1902), Nghĩa Điền Công Chúa – 26th princess</li>
+  <li>Princess Nhu Nghi (Nov 22, 1833 – 1929), Xuân Lai Công Chúa – 44th princess and the longest-surviving child of Emperor Minh Mạng</li>
+</ul>`,
+
+        vi: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Tên Khai Sinh</span><span class="meta-value">Nguyễn Phúc Miên Chí (阮福綿寘)</span></div>
+  <div class="meta-item"><span class="meta-label">Tước Phong</span><span class="meta-value">Vĩnh Lộc Quận Công (永祿郡公)</span></div>
+  <div class="meta-item"><span class="meta-label">Sinh / Mất</span><span class="meta-value">20/09/1836 – 18/12/1888 (Thọ 52 tuổi)</span></div>
+  <div class="meta-item"><span class="meta-label">Thụy Hiệu</span><span class="meta-value">Cung Lượng (恭亮)</span></div>
+  <div class="meta-item"><span class="meta-label">Thân Phụ / Mẫu</span><span class="meta-value">Vua Minh Mạng & Lệ tần Nguyễn Thị Thúy Trúc</span></div>
+  <div class="meta-item"><span class="meta-label">Hậu Duệ</span><span class="meta-value">13 con trai, 18 con gái</span></div>
+</div>
+
+<h2>Thân Thế & Niên Thiếu</h2>
+<p>Hoàng tử Nguyễn Phúc Miên Chí (hoặc Trí, chữ Hán: 阮福綿寘) sinh ngày 20 tháng 9 năm 1836 (tức ngày 10 tháng 8 âm lịch năm Bính Thân), là con trai thứ 73 của vua Minh Mạng và là người con thứ sáu của Ngũ giai Lệ tần Nguyễn Thị Thúy Trúc. Khi còn ở phủ riêng, hoàng tử Miên Chí nổi tiếng chăm học, thông thuộc kinh sử và có vốn hiểu biết sâu rộng.</p>
+
+<h2>Tước Phong & Ban Thưởng Hoàng Gia</h2>
+<p>Năm Minh Mạng thứ 21 (1840), vua Minh Mạng cho đúc các con thú bằng vàng để ban thưởng cho các hoàng tử chưa được phong tước. Hoàng tử Miên Chí được ban ban một con voi bằng vàng nặng 3 lạng 2 đồng cân.</p>
+<p>Năm Tự Đức thứ 5 (1852), ông chính thức được sách phong làm <strong>Vĩnh Lộc Quận công</strong> (永祿郡公).</p>
+
+<h2>Các Sự Kiện Dưới Thời Tự Đức</h2>
+<p>Năm Tự Đức thứ 28 (1875), quận công Miên Chí vay nợ kho Nghĩa thương 1.000 quan tiền để sửa chữa phủ đệ. Tuy nhiên, chỉ trong một tháng ông đã tiêu xài hết và xin lĩnh trước 2–3 năm lương. Quan quản Phủ Tôn Nhân là Miên Định (anh thứ ba của ông) e ngại ông không phục tình nên đã dâng tiếu hặc tấu trình lên vua. Vua Tự Đức phán rằng: <em>"Nhà người ta phạm việc còn có cha anh, không dạy lỗi ở huynh trưởng, trong luật đã có điều rõ. Vương công phải sửa mình cho người noi theo, sao không phục tình, cho được dạy răn chỉ cốt thỏa đáng mà thôi."</em></p>
+
+<p>Về sau, người con trai thứ hai của ông với người vợ thứ là Công tử Hồng Cạnh (được tập phong Kỳ ngoại hầu) từng qua lại vay tiền với người thông ngôn ở sứ quán Pháp. Phủ Tôn Nhân đem việc tâu lên, kết quả Hồng Cạnh bị phạt 80 trượng, còn quận công Miên Chí bị phạt tước 1 năm bổng lộc.</p>
+
+<h2>Hậu Duệ & Qua Đời</h2>
+<p>Năm Đồng Khánh thứ 3 (1888), ngày 16 tháng 11 âm lịch (18/12/1888), quận công Miên Chí mất, thọ 53 tuổi (tuổi mụ), được ban thụy là <strong>Cung Lượng</strong> (恭亮). Tấm mộ của ông được an táng tại sườn đông bắc núi Ngự Bình (nay thuộc phường An Cựu, Huế), phủ thờ dựng tại xã An Quán (Hương Trà, Huế).</p>
+<p>Quận công Miên Chí có tổng cộng 13 con trai và 18 con gái. Phòng của ông được vua Minh Mạng ban cho bộ chữ <em>Lập</em> (立) để đặt tên cho các thế hệ con cháu sau này.</p>
+
+<h2>Anh Chị Em Cùng Mẹ</h2>
+<h3>Anh Em Trai (5)</h3>
+<ul>
+  <li>Sơn Tĩnh Quận công Nguyễn Phúc Miên Lương (27/2/1826 – 24/8/1863) – Hoàng tử thứ 31</li>
+  <li>Tuy An Quận công Nguyễn Phúc Miên Kháp (5/10/1828 – 14/7/1893) – Hoàng tử thứ 41</li>
+  <li>Hoài Đức Quận vương Nguyễn Phúc Miên Lâm (20/1/1832 – 28/12/1897) – Hoàng tử thứ 57</li>
+  <li>An Xuyên vương Nguyễn Phúc Miên Bàng (5/6/1838 – 19/8/1902) – Hoàng tử thứ 76</li>
+  <li>An Thành vương Nguyễn Phúc Miên Lịch (13/5/1841 – 5/11/1919) – Hoàng tử thứ 78, út nhất, chào đời sau khi vua cha mất</li>
+</ul>
+<h3>Chị Em Gái (2)</h3>
+<ul>
+  <li>Nghĩa Điền Công chúa Nguyễn Phúc Trinh Nhàn (14/6/1827 – 28/7/1902) – Hoàng nữ thứ 26</li>
+  <li>Xuân Lai Công chúa Nguyễn Phúc Nhu Nghi (22/11/1833 – 1929) – Hoàng nữ thứ 44, sống thọ nhất trong các con của vua Minh Mạng</li>
+</ul>` } },
+    { id: "gen1-spouse-unknown", gender: "female", isRoyalDirectLine: false, name: null,
+      placeholder: { en: "Not yet known", vi: "Chưa rõ" },
+      title: null,
+      bio: { en: "This ancestor has not been identified yet.", vi: "Chưa xác định được tổ tiên này." } }
+  ]},
+  { note: "Generation 2 (Hường)", people: [
+    { id: "gen2-unknown-male", gender: "male", isRoyalDirectLine: true, name: "Nguyễn Phúc <span class=\"gen-marker\">Hường</span> Lục", placeholder: null,
+      title: null,
+      bio: { en: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Personal Name</span><span class="meta-value">Nguyễn Phúc Hường Lục</span></div>
+  <div class="meta-item"><span class="meta-label">Generation</span><span class="meta-value">2nd Generation (Hường / Hồng)</span></div>
+  <div class="meta-item"><span class="meta-label">Spouse</span><span class="meta-value">Lê Thị Hợi</span></div>
+  <div class="meta-item"><span class="meta-label">Parents</span><span class="meta-value">Nguyễn Phúc Miên Chí</span></div>
+</div>
+
+<h2>Biography & Lineage</h2>
+<p>Nguyễn Phúc Hường Lục belonged to the second generation of the imperial Nguyễn Phúc clan, descending from Prince Nguyễn Phúc Miên Chí. As a male member of the Hường (Hồng) generation, his middle name aligns with the imperial naming conventions established by Emperor Minh Mạng.</p>`,
+
+        vi: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Họ Và Tên</span><span class="meta-value">Nguyễn Phúc Hường Lục</span></div>
+  <div class="meta-item"><span class="meta-label">Thế Hệ</span><span class="meta-value">Thế hệ thứ 2 (chữ Hường / Hồng)</span></div>
+  <div class="meta-item"><span class="meta-label">Phu Nhân</span><span class="meta-value">Lê Thị Hợi</span></div>
+  <div class="meta-item"><span class="meta-label">Thân Phụ</span><span class="meta-value">Nguyễn Phúc Miên Chí</span></div>
+</div>
+
+<h2>Thân Thế & Dòng Dõi</h2>
+<p>Nguyễn Phúc Hường Lục thuộc thế hệ thứ hai của hoàng tộc Nguyễn Phúc, là con trai của Vĩnh Lộc Quận công Nguyễn Phúc Miên Chí. Mang chữ đệm thế hệ Hường (Hồng), tên của ông tuân theo quy tắc đặt tên thuộc bộ thơ do vua Minh Mạng ban hành.</p>` } },
+    { id: "gen2-unknown-female", gender: "female", isRoyalDirectLine: false, name: "Lê Thị Hợi", placeholder: null,
+      title: null,
+      bio: { en: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Personal Name</span><span class="meta-value">Lê Thị Hợi</span></div>
+  <div class="meta-item"><span class="meta-label">Spouse</span><span class="meta-value">Nguyễn Phúc Hường Lục</span></div>
+</div>
+
+<h2>Biography</h2>
+<p>Lady Lê Thị Hợi was the wife of Nguyễn Phúc Hường Lục.</p>`,
+
+        vi: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Họ Và Tên</span><span class="meta-value">Lê Thị Hợi</span></div>
+  <div class="meta-item"><span class="meta-label">Phu Quân</span><span class="meta-value">Nguyễn Phúc Hường Lục</span></div>
+</div>
+
+<h2>Thân Thế</h2>
+<p>Bà Lê Thị Hợi là phu nhân của ông Nguyễn Phúc Hường Lục.</p>` } }
+  ]},
+  { note: "Generation 3 (Bửu)", people: [
+    { id: "ly-truong-ich", gender: "male", isRoyalDirectLine: false, name: "Lý Trường Ích", placeholder: null,
+      title: null,
+      bio: { en: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Personal Name</span><span class="meta-value">Lý Trường Ích (李長益)</span></div>
+  <div class="meta-item"><span class="meta-label">Ancestral Origin</span><span class="meta-value">Hainan Island, Wenchang County, Duoji Village (海南島，文昌縣，多吉村)</span></div>
+  <div class="meta-item"><span class="meta-label">Spouse</span><span class="meta-value">Nguyễn Phúc Công Tôn Nữ Thị Liên</span></div>
+  <div class="meta-item"><span class="meta-label">Profession</span><span class="meta-value">Traditional Chinese Medicine Practitioner</span></div>
+</div>
+
+<h2>Ancestry & Origin</h2>
+<p>Lý Trường Ích (Chinese characters: 李長益) originated from Duoji Village, Wenchang County, Hainan Island, China (海南島，文昌縣，多吉村).</p>
+
+<h2>Life & Profession</h2>
+<p>He was a practitioner of traditional Chinese medicine. Because of his profession, the local community in the area where he lived respectfully referred to his wife, Lady Thị Liên, as “Bà Thầy” (the Master's Wife).</p>`,
+
+        vi: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Họ Và Tên</span><span class="meta-value">Lý Trường Ích (李長益)</span></div>
+  <div class="meta-item"><span class="meta-label">Nguyên Quán</span><span class="meta-value">Đảo Hải Nam, huyện Văn Xương, làng Đa Cát (海南島，文昌縣，多吉村)</span></div>
+  <div class="meta-item"><span class="meta-label">Phu Nhân</span><span class="meta-value">Nguyễn Phúc Công Tôn Nữ Thị Liên</span></div>
+  <div class="meta-item"><span class="meta-label">Nghề Nghiệp</span><span class="meta-value">Thầy thuốc Đông y</span></div>
+</div>
+
+<h2>Xuất Thân & Nguyên Quán</h2>
+<p>Lý Trường Ích (chữ Hán: 李長益) có nguyên quán gốc tại làng Đa Cát, huyện Văn Xương, đảo Hải Nam, Trung Quốc (海南島，文昌縣，多吉村).</p>
+
+<h2>Cuộc Đời & Nghề Nghiệp</h2>
+<p>Ông là một thầy thuốc Đông y truyền thống. Chính vì nghề nghiệp chữa bệnh cứu người của ông, người dân địa phương trong vùng nơi hai vợ chồng sinh sống thường kính trọng gọi phu nhân của ông (bà Thị Liên) bằng danh xưng "Bà Thầy".</p>` } },
+    { id: "cong-tang-ton-nu-thi-lien", gender: "female", isRoyalDirectLine: true, name: "Nguyễn Phúc <span class=\"gen-marker\">Công Tôn Nữ</span> Thị Liên", placeholder: null,
+      title: null,
+      bio: { en: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Personal Name</span><span class="meta-value">Nguyễn Phúc Công Tôn Nữ Thị Liên (阮福公孫女氏蓮)</span></div>
+  <div class="meta-item"><span class="meta-label">Royal Clan</span><span class="meta-value">Nguyễn Phúc Clan (阮福氏)</span></div>
+  <div class="meta-item"><span class="meta-label">Dharma Name</span><span class="meta-value">Nguyên Hoa (Pháp danh: Nguyên Hoa)</span></div>
+  <div class="meta-item"><span class="meta-label">Life Span</span><span class="meta-value">Jan 26, 1889 – Jul 30, 1973 (84 years)</span></div>
+  <div class="meta-item"><span class="meta-label">Spouse</span><span class="meta-value">Lý Trường Ích</span></div>
+  <div class="meta-item"><span class="meta-label">Burial Site</span><span class="meta-value">Nam Giao, Huế</span></div>
+</div>
+
+<h2>Life & Demise</h2>
+<p>Lady Nguyễn Phúc Công Tôn Nữ Thị Liên was born on the 25th day of the fifth lunar month in the Year of the Earth Ox (Kỷ Sửu), corresponding to January 26, 1889.</p>
+<p>She passed away on the 1st day of the seventh lunar month in the Year of the Water Ox (Quý Sửu), corresponding to July 30, 1973, at the age of 84. Her funeral was held in Phú Hòa, Huế, and she was laid to rest in Nam Giao, Huế.</p>
+<p>Local residents in the area where she lived affectionately and respectfully referred to her as “Bà Thầy” because her husband, Mr. Lý Trường Ích, was a practitioner of traditional Chinese medicine.</p>
+
+<h2>Royal Lineage & Title Analysis</h2>
+<p>Nguyễn Phúc Công Tôn Nữ Thị Liên (Chinese characters: 阮福公孫女氏蓮) belonged to the imperial Nguyễn Phúc clan (阮福). As indicated by her title <em>Công Tôn Nữ</em> (公孫女):</p>
+<ul>
+  <li>She is a 2nd-generation descendant (granddaughter) of a Prince (Thân vương / Công).</li>
+  <li>Alternatively, in relation to an Emperor, the title denotes a 3rd-generation direct descendant (great-granddaughter).</li>
+</ul>
+
+<h2>Buddhist Identity</h2>
+<p>Her ordained Buddhist Dharma name (Pháp danh) was <strong>Nguyên Hoa</strong>.</p>
+
+<h2>Siblings</h2>
+
+<h3>Brothers (1)</h3>
+<ul>
+  <li>Ưng Thúc</li>
+</ul>
+
+<h3>Sisters (3)</h3>
+<ul>
+  <li>Công Tôn Nữ (Anonymous Sister)</li>
+  <li>Công Tôn Nữ (Anonymous Sister)</li>
+  <li>Công Tôn Nữ (Anonymous Sister)</li>
+</ul>`,
+
+        vi: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Họ Và Tên</span><span class="meta-value">Nguyễn Phước Công Tôn Nữ Thị Liên (阮福公孫女氏蓮)</span></div>
+  <div class="meta-item"><span class="meta-label">Hoàng Tộc</span><span class="meta-value">Dòng họ Nguyễn Phước / Nguyễn Phúc (阮福氏)</span></div>
+  <div class="meta-item"><span class="meta-label">Pháp Danh</span><span class="meta-value">Nguyên Hoa</span></div>
+  <div class="meta-item"><span class="meta-label">Sinh / Mất</span><span class="meta-value">26/01/1889 – 30/07/1973 (Thọ 84 tuổi)</span></div>
+  <div class="meta-item"><span class="meta-label">Phu Quân</span><span class="meta-value">Lý Trường Ích</span></div>
+  <div class="meta-item"><span class="meta-label">An Táng</span><span class="meta-value">Nam Giao, Huế</span></div>
+</div>
+
+<h2>Cuộc Đời & Ngày Mất</h2>
+<p>Bà Nguyễn Phước Công Tôn Nữ Thị Liên sinh ngày 25 tháng 5 năm Kỷ Sửu (âm lịch), tương ứng với ngày 26 tháng 1 năm 1889.</p>
+<p>Bà tạ thế vào ngày 1 tháng 7 năm Quý Sửu (âm lịch), tương ứng với ngày 30 tháng 7 năm 1973, hưởng thọ 84 tuổi. Lễ tang của bà được tổ chức tại Phú Hòa, Huế, và sau đó bà được an táng tại Nam Giao, Huế.</p>
+<p>Người dân địa phương nơi bà sinh sống thường quen gọi bà bằng danh xưng trìu mến và kính trọng là "Bà Thầy", bởi vì phu quân của bà, ông Lý Trường Ích, là một thầy thuốc Đông y truyền thống.</p>
+
+<h2>Thân Thế & Danh Xưng Hoàng Tộc</h2>
+<p>Nguyễn Phước Công Tôn Nữ Thị Liên (chữ Hán: 阮福公孫女氏蓮) là một nữ giới thuộc Hoàng tộc nhà Nguyễn (阮), mang họ Nguyễn Phước / Nguyễn Phúc (阮福). Dựa theo quy tắc danh xưng hoàng tộc:</p>
+<ul>
+  <li>Bà là cháu hai đời (cháu nội / 孫女) của một vị Thân vương nhà Nguyễn.</li>
+  <li>Hoặc tính theo dòng Hoàng đế, danh xưng <em>Công Tôn Nữ</em> chỉ người cháu 3 đời (chắt) của Hoàng đế.</li>
+</ul>
+
+<h2>Pháp Danh Phật Giáo</h2>
+<p>Bà có pháp danh Phật giáo là <strong>Nguyên Hoa</strong>.</p>
+
+<h2>Anh Chị Em Cùng Thế Hệ</h2>
+
+<h3>Anh Em Trai (1)</h3>
+<ul>
+  <li>Ưng Thúc</li>
+</ul>
+
+<h3>Chị Em Gái (3)</h3>
+<ul>
+  <li>Công Tôn Nữ (Chị/em gái khuyết danh)</li>
+  <li>Công Tôn Nữ (Chị/em gái khuyết danh)</li>
+  <li>Công Tôn Nữ (Chị/em gái khuyết danh)</li>
+</ul>` } }
+  ]},
+  { note: "Generation 4", people: [
+    { id: "great-grandfather", gender: "male", isRoyalDirectLine: true, name: null,
+      placeholder: { en: "Great-grandfather", vi: "Ông cố" },
+      title: null,
+      bio: { en: "Name and biography to be added.", vi: "Tên và tiểu sử sẽ được bổ sung." } },
+    { id: "great-grandmother", gender: "female", isRoyalDirectLine: false, name: null,
+      placeholder: { en: "Great-grandmother", vi: "Bà cố" },
+      title: null,
+      bio: { en: "Name and biography to be added.", vi: "Tên và tiểu sử sẽ được bổ sung." } }
+  ]},
+  { note: "Generation 5", people: [
+    { id: "grandfather", gender: "male", isRoyalDirectLine: true, name: "Hung Van Ly",
+      placeholder: { en: "Grandfather", vi: "Ông nội" },
+      title: null,
+      bio: { en: "Name and biography to be added.", vi: "Tên và tiểu sử sẽ được bổ sung." } },
+    { id: "grandmother", gender: "female", isRoyalDirectLine: false, name: "Lan Tran",
+      placeholder: { en: "Grandmother", vi: "Bà nội" },
+      title: { en: "Grandmother", vi: "Bà nội" },
+      bio: { en: "Name and biography to be added.", vi: "Tên và tiểu sử sẽ được bổ sung." } }
+  ]},
+  { note: "Generation 6", people: [
+    { id: "father", gender: "male", isRoyalDirectLine: false, name: null,
+      placeholder: { en: "Father", vi: "Bố" },
+      title: null,
+      bio: { en: "Name and biography to be added.", vi: "Tên và tiểu sử sẽ được bổ sung." } },
+    { id: "mother", gender: "female", isRoyalDirectLine: true, name: null,
+      placeholder: { en: "Mother", vi: "Mẹ" },
+      title: null,
+      bio: { en: "Name and biography to be added.", vi: "Tên và tiểu sử sẽ được bổ sung." } }
+  ]},
+  { note: "Generation 7", people: [
+    { id: "me", gender: "male", isRoyalDirectLine: true, name: null,
+      placeholder: { en: "Me", vi: "Tôi" },
+      title: null,
+      bio: { en: "Name and biography to be added.", vi: "Tên và tiểu sử sẽ được bổ sung." } }
+  ]}
+];
+
+function findPersonById(id) {
+  for (const node of familyTree) {
+    for (const person of node.people) {
+      if (person.id === id) return person;
+    }
+  }
+  return null;
+}
+
+/* ---------------------------------------------------------
+   Language
+--------------------------------------------------------- */
+function getLang() { return localStorage.getItem("tree-lang") || "en"; }
+function setLang(lang) { localStorage.setItem("tree-lang", lang); }
+
+function renderLangToggle() {
+  const lang = getLang();
+  document.querySelectorAll(".lang-toggle button").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.lang === lang);
+  });
+}
+
+function applyStaticText(lang) {
+  document.querySelectorAll("[data-en]").forEach((el) => {
+    el.innerHTML = lang === "vi" ? el.dataset.vi : el.dataset.en;
+  });
+}
+
+/* ---------------------------------------------------------
+   Gender icons
+--------------------------------------------------------- */
+function genderIcon(gender) {
+  if (gender === "male") {
+    return `<svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <circle cx="13" cy="19" r="8" stroke="#2e4057" stroke-width="2.2"/>
+      <path d="M18.5 13.5L26 6" stroke="#2e4057" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M19 6h7v7" stroke="#2e4057" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
+  }
+  if (gender === "female") {
+    return `<svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <circle cx="16" cy="12" r="8" stroke="#7a3b54" stroke-width="2.2"/>
+      <path d="M16 20v9" stroke="#7a3b54" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M11.5 25h9" stroke="#7a3b54" stroke-width="2.2" stroke-linecap="round"/>
+    </svg>`;
+  }
+  if (gender === "unknown") {
+    return `<svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <circle cx="16" cy="16" r="9" stroke="#948a78" stroke-width="2" stroke-dasharray="3 4"/>
+    </svg>`;
+  }
+  return ``;
+}
+
+/* ---------------------------------------------------------
+   Views
+--------------------------------------------------------- */
+function renderTree(lang) {
+  const root = document.querySelector(".tree");
+  const nonClickableIds = [
+    "great-grandfather", "great-grandmother",
+    "grandfather", "grandmother",
+    "father", "mother",
+    "me"
+  ];
+
+  root.innerHTML = familyTree.map((node) => {
+    const rows = node.people.map((person) => {
+      const isPlaceholder = !person.name;
+      let label = isPlaceholder ? (person.placeholder ? person.placeholder[lang] : "") : person.name;
+      const title = person.title ? person.title[lang] : "";
+      const isNonClickable = nonClickableIds.includes(person.id);
+      const iconHtml = genderIcon(person.gender);
+
+      return `
+        <div class="person-row">
+          ${iconHtml ? `<div class="icon-wrap">${iconHtml}</div>` : ""}
+          <div class="person-info">
+            ${
+              isNonClickable
+                ? `<span class="person-name${isPlaceholder ? " is-placeholder" : ""} non-clickable">${label}</span>${person.isRoyalDirectLine ? CROWN_ICON_SVG : ""}`
+                : `<span class="person-name${isPlaceholder ? " is-placeholder" : ""}" role="link" tabindex="0" data-nav="${encodeURIComponent(person.id)}">${label}</span>${person.isRoyalDirectLine ? CROWN_ICON_SVG : ""}`
+            }
+            ${title ? `<span class="person-title">${title}</span>` : ""}
+          </div>
+        </div>`;
+    }).join("");
+    return `<div class="node">${rows}</div>`;
+  }).join("");
+}
+
+function renderPerson(lang, id) {
+  const person = id ? findPersonById(id) : null;
+  const nameEl = document.querySelector("[data-field='name']");
+  const titleEl = document.querySelector("[data-field='title']");
+  const bioEl = document.querySelector("[data-field='bio']");
+  const iconEl = document.querySelector("[data-field='icon']");
+  const notFoundEl = document.querySelector(".not-found");
+  const headerEl = document.querySelector(".detail-header");
+  const bioWrapEl = document.querySelector(".detail-body-wrap");
+
+  if (!person) {
+    headerEl.hidden = true;
+    bioWrapEl.hidden = true;
+    notFoundEl.hidden = false;
+    notFoundEl.textContent = lang === "vi" ? "Không tìm thấy người này." : "This person could not be found.";
+    return;
+  }
+
+  headerEl.hidden = false;
+  bioWrapEl.hidden = false;
+  notFoundEl.hidden = true;
+
+  const isPlaceholder = !person.name;
+  let label = isPlaceholder ? (person.placeholder ? person.placeholder[lang] : "") : person.name;
+
+  iconEl.innerHTML = genderIcon(person.gender);
+  nameEl.innerHTML = label + (person.isRoyalDirectLine ? CROWN_ICON_SVG : "");
+  nameEl.classList.toggle("is-placeholder", isPlaceholder);
+
+  const title = person.title ? person.title[lang] : "";
+  titleEl.textContent = title;
+  titleEl.style.display = title ? "block" : "none";
+
+  bioEl.innerHTML = person.bio[lang];
+  document.title = `${label.replace(/<[^>]*>/g, '')} · ${lang === "vi" ? "Gia Phả" : "Family Tree"}`;
+}
+
+function renderInfoPage(lang, id) {
+  const page = infoPages[id];
+  const nameEl = document.querySelector("[data-field='name']");
+  const titleEl = document.querySelector("[data-field='title']");
+  const bioEl = document.querySelector("[data-field='bio']");
+  const iconEl = document.querySelector("[data-field='icon']");
+  const notFoundEl = document.querySelector(".not-found");
+  const headerEl = document.querySelector(".detail-header");
+  const bioWrapEl = document.querySelector(".detail-body-wrap");
+
+  if (!page) {
+    headerEl.hidden = true;
+    bioWrapEl.hidden = true;
+    notFoundEl.hidden = false;
+    notFoundEl.textContent = lang === "vi" ? "Không tìm thấy trang này." : "Page could not be found.";
+    return;
+  }
+
+  headerEl.hidden = false;
+  bioWrapEl.hidden = false;
+  notFoundEl.hidden = true;
+
+  iconEl.innerHTML = `<span class="legend-dot" style="width:24px; height:24px;"></span>`;
+  nameEl.innerHTML = page.name[lang];
+  nameEl.classList.remove("is-placeholder");
+
+  const title = page.title ? page.title[lang] : "";
+  titleEl.textContent = title;
+  titleEl.style.display = title ? "block" : "none";
+
+  bioEl.innerHTML = page.bio[lang];
+  document.title = `${page.name[lang]} · ${lang === "vi" ? "Gia Phả" : "Family Tree"}`;
+}
+
+/* ---------------------------------------------------------
+   Routing (hash-based)
+--------------------------------------------------------- */
+function route() {
+  const hash = window.location.hash;
+  const lang = getLang();
+  const personMatch = hash.match(/^#\/person\/(.+)$/);
+  const infoMatch = hash.match(/^#\/info\/(.+)$/);
+  const treeView = document.getElementById("view-tree");
+  const detailView = document.getElementById("view-detail");
+
+  if (personMatch) {
+    treeView.hidden = true;
+    detailView.hidden = false;
+    renderPerson(lang, decodeURIComponent(personMatch[1]));
+  } else if (infoMatch) {
+    treeView.hidden = true;
+    detailView.hidden = false;
+    renderInfoPage(lang, decodeURIComponent(infoMatch[1]));
+  } else {
+    treeView.hidden = false;
+    detailView.hidden = true;
+    renderTree(lang);
+  }
+  applyStaticText(lang);
+  window.scrollTo(0, 0);
+}
+
+function navigateTo(path) {
+  window.location.hash = path;
+}
+
+document.addEventListener("click", (e) => {
+  const personEl = e.target.closest("[data-nav]");
+  if (personEl) navigateTo(`/person/${encodeURIComponent(personEl.dataset.nav)}`);
+
+  const infoEl = e.target.closest("[data-nav-info]");
+  if (infoEl) navigateTo(`/info/${encodeURIComponent(infoEl.dataset.navInfo)}`);
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const personEl = e.target.closest("[data-nav]");
+  if (personEl) {
+    e.preventDefault();
+    navigateTo(`/person/${encodeURIComponent(personEl.dataset.nav)}`);
+  }
+  const infoEl = e.target.closest("[data-nav-info]");
+  if (infoEl) {
+    e.preventDefault();
+    navigateTo(`/info/${encodeURIComponent(infoEl.dataset.navInfo)}`);
+  }
+});
+
+document.querySelectorAll(".lang-toggle button").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    setLang(btn.dataset.lang);
+    renderLangToggle();
+    route();
+  });
+});
+
+document.getElementById("back-btn").addEventListener("click", () => {
+  window.location.hash = "";
+});
+
+window.addEventListener("hashchange", route);
+
+renderLangToggle();
+route();
+</script>
+</body>
+</html>
