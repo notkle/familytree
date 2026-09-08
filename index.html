@@ -1535,6 +1535,8 @@ function renderInfoPage(lang, id) {
 /* ---------------------------------------------------------
    Routing (hash-based)
 --------------------------------------------------------- */
+let savedTreeScrollY = 0;
+
 function route(options = {}) {
   const hash = window.location.hash;
   const lang = getLang();
@@ -1543,6 +1545,7 @@ function route(options = {}) {
   const treeView = document.getElementById("view-tree");
   const detailView = document.getElementById("view-detail");
   const backBtn = document.getElementById("back-btn");
+  const isDetail = !!(personMatch || infoMatch);
 
   if (personMatch) {
     treeView.hidden = true;
@@ -1561,10 +1564,17 @@ function route(options = {}) {
     renderTree(lang);
   }
   applyStaticText(lang);
-  if (!options.preserveScroll) window.scrollTo(0, 0);
+
+  if (!options.preserveScroll) {
+    // Returning to the tree (back button, browser back, etc.) restores
+    // the scroll position the user had before they navigated away.
+    // Entering a detail page always starts at the top.
+    window.scrollTo(0, isDetail ? 0 : savedTreeScrollY);
+  }
 }
 
 function navigateTo(path) {
+  savedTreeScrollY = window.scrollY;
   window.location.hash = path;
 }
 
