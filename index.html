@@ -57,8 +57,8 @@
     text-decoration: none !important;
   }
 
-  /* Language toggle */
-  .lang-toggle {
+  /* Top bar: back link (left) + language toggle (right) */
+  .top-bar {
     position: fixed;
     top: 0;
     left: 0;
@@ -66,14 +66,40 @@
     height: var(--toggle-h);
     display: flex;
     align-items: center;
+    z-index: 10;
+    background: var(--paper);
+    padding: 0 8px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .top-back-link {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink-soft);
+    text-decoration: none;
+    background: none;
+    border: none;
+    padding: 10px 8px;
+    margin: 0 2px;
+    cursor: pointer;
+    min-height: 32px;
+  }
+
+  .top-back-link:hover,
+  .top-back-link:focus-visible {
+    color: var(--ink);
+  }
+
+  .lang-toggle {
+    display: flex;
+    align-items: center;
     gap: 4px;
     font-family: var(--sans);
     font-size: 13px;
     letter-spacing: 0.02em;
-    z-index: 10;
-    background: var(--paper);
-    padding: 0 12px;
-    border-bottom: 1px solid var(--line);
+    margin-left: auto;
   }
 
   .lang-toggle button {
@@ -95,6 +121,7 @@
   }
 
   .lang-toggle button:focus-visible,
+  .top-back-link:focus-visible,
   a:focus-visible {
     outline: 2px solid var(--indigo);
     outline-offset: 2px;
@@ -284,24 +311,6 @@
     margin: 0 auto;
     padding: calc(var(--toggle-h) + 16px) var(--gutter) 100px;
   }
-
-  .back-link {
-    display: inline-block;
-    font-family: var(--sans);
-    font-size: 13px;
-    color: var(--ink-soft);
-    text-decoration: none;
-    margin-bottom: 28px;
-    border-bottom: 1px solid transparent;
-    background: none;
-    border-top: none; border-left: none; border-right: none;
-    padding: 10px 4px;
-    margin-left: -4px;
-    cursor: pointer;
-    min-height: 44px;
-  }
-
-  .back-link:hover, .back-link:focus-visible { border-bottom-color: var(--ink-soft); }
 
   .detail-header {
     display: flex;
@@ -581,9 +590,12 @@
 </head>
 <body>
 
-<div class="lang-toggle">
-  <button type="button" data-lang="en">EN</button>
-  <button type="button" data-lang="vi">VI</button>
+<div class="top-bar">
+  <button type="button" class="top-back-link" id="back-btn" hidden data-en="&larr; Back to family tree" data-vi="&larr; Về gia phả">&larr; Back to family tree</button>
+  <div class="lang-toggle">
+    <button type="button" data-lang="en">EN</button>
+    <button type="button" data-lang="vi">VI</button>
+  </div>
 </div>
 
 <!-- TREE VIEW -->
@@ -609,8 +621,6 @@
 <!-- DETAIL VIEW (PERSON & INFO PAGES) -->
 <div id="view-detail" hidden>
   <main class="detail-page">
-    <button type="button" class="back-link" id="back-btn" data-en="&larr; Back to family tree" data-vi="&larr; Về gia phả">&larr; Back to family tree</button>
-
     <div class="detail-header">
       <div class="icon-wrap" data-field="icon"></div>
       <div>
@@ -1532,18 +1542,22 @@ function route() {
   const infoMatch = hash.match(/^#\/info\/(.+)$/);
   const treeView = document.getElementById("view-tree");
   const detailView = document.getElementById("view-detail");
+  const backBtn = document.getElementById("back-btn");
 
   if (personMatch) {
     treeView.hidden = true;
     detailView.hidden = false;
+    backBtn.hidden = false;
     renderPerson(lang, decodeURIComponent(personMatch[1]));
   } else if (infoMatch) {
     treeView.hidden = true;
     detailView.hidden = false;
+    backBtn.hidden = false;
     renderInfoPage(lang, decodeURIComponent(infoMatch[1]));
   } else {
     treeView.hidden = false;
     detailView.hidden = true;
+    backBtn.hidden = true;
     renderTree(lang);
   }
   applyStaticText(lang);
