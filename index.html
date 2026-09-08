@@ -1535,7 +1535,7 @@ function renderInfoPage(lang, id) {
 /* ---------------------------------------------------------
    Routing (hash-based)
 --------------------------------------------------------- */
-function route() {
+function route(options = {}) {
   const hash = window.location.hash;
   const lang = getLang();
   const personMatch = hash.match(/^#\/person\/(.+)$/);
@@ -1561,7 +1561,7 @@ function route() {
     renderTree(lang);
   }
   applyStaticText(lang);
-  window.scrollTo(0, 0);
+  if (!options.preserveScroll) window.scrollTo(0, 0);
 }
 
 function navigateTo(path) {
@@ -1592,9 +1592,11 @@ document.addEventListener("keydown", (e) => {
 
 document.querySelectorAll(".lang-toggle button").forEach((btn) => {
   btn.addEventListener("click", () => {
+    const scrollY = window.scrollY;
     setLang(btn.dataset.lang);
     renderLangToggle();
-    route();
+    route({ preserveScroll: true });
+    window.scrollTo(0, scrollY);
   });
 });
 
