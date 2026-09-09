@@ -20,9 +20,10 @@
     --indigo: #2e4057;
     --plum: #7a3b54;
     --grey: #948a78;
-    --jade: #3c6e59;
-    --jade-bg: #e9f0ea;
-    --jade-border: rgba(60, 110, 89, 0.35);
+    --vn-yellow: #ecca5c;
+    --vn-yellow-bg: #f2d675;
+    --vn-red: #a83226;
+    --vn-red-border: rgba(168, 50, 38, 0.45);
     --serif: "Noto Serif", "Times New Roman", serif;
     --sans: "Noto Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --toggle-h: 44px;
@@ -279,13 +280,13 @@
     max-width: 200px;
     text-align: center;
     padding: 14px 16px;
-    background: var(--jade-bg);
-    border: 1px solid var(--jade-border);
+    background: var(--vn-yellow-bg);
+    border: 1px solid var(--vn-red-border);
     border-radius: 14px;
     font-family: var(--serif);
     font-weight: 600;
     font-size: 15px;
-    color: var(--jade);
+    color: var(--vn-red);
     cursor: pointer;
     text-decoration: none;
     transition: border-color 0.15s ease, background 0.15s ease;
@@ -293,13 +294,13 @@
 
   .note-block:hover,
   .note-block:focus-visible {
-    border-color: var(--jade);
-    background: #dfeae2;
+    border-color: var(--vn-red);
+    background: var(--vn-yellow);
     outline: none;
   }
 
   .note-block:focus-visible {
-    outline: 2px solid var(--jade);
+    outline: 2px solid var(--vn-red);
     outline-offset: 2px;
   }
 
@@ -711,6 +712,7 @@ const infoPages = {
     }
   },
   "royal-surnames": {
+    icon: true,
     name: {
       en: "Distinct Royal Generational Surnames",
       vi: "Thế Hệ Đế Tự Hoàng Gia"
@@ -1570,6 +1572,7 @@ function renderPerson(lang, id) {
   const isPlaceholder = !person.name;
   let label = isPlaceholder ? (person.placeholder ? person.placeholder[lang] : "") : person.name;
 
+  iconEl.style.display = "";
   iconEl.innerHTML = genderIcon(person.gender);
   nameEl.innerHTML = label + (person.isRoyalDirectLine ? CROWN_ICON_SVG : "");
   nameEl.classList.toggle("is-placeholder", isPlaceholder);
@@ -1604,7 +1607,13 @@ function renderInfoPage(lang, id) {
   bioWrapEl.hidden = false;
   notFoundEl.hidden = true;
 
-  iconEl.innerHTML = `<span class="legend-dot" style="width:24px; height:24px;"></span>`;
+  if (page.icon) {
+    iconEl.style.display = "";
+    iconEl.innerHTML = `<span class="legend-dot" style="width:24px; height:24px;"></span>`;
+  } else {
+    iconEl.style.display = "none";
+    iconEl.innerHTML = "";
+  }
   nameEl.innerHTML = page.name[lang];
   nameEl.classList.remove("is-placeholder");
 
