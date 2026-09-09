@@ -20,6 +20,9 @@
     --indigo: #2e4057;
     --plum: #7a3b54;
     --grey: #948a78;
+    --jade: #3c6e59;
+    --jade-bg: #e9f0ea;
+    --jade-border: rgba(60, 110, 89, 0.35);
     --serif: "Noto Serif", "Times New Roman", serif;
     --sans: "Noto Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --toggle-h: 44px;
@@ -197,7 +200,7 @@
     position: relative;
     max-width: 560px;
     margin: 0 auto;
-    padding: 0 var(--gutter) 100px;
+    padding: 0 var(--gutter) 20px;
   }
 
   .tree::before {
@@ -258,6 +261,46 @@
     background: none;
     padding: 0;
     display: inline;
+  }
+
+  /* Standalone note: visually detached from the lineage cards above it
+     (smaller, centered, its own color) to signal it's not a blood relation. */
+  .note-block-wrap {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 0 var(--gutter) 100px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .note-block {
+    display: inline-block;
+    width: 100%;
+    max-width: 200px;
+    text-align: center;
+    padding: 14px 16px;
+    background: var(--jade-bg);
+    border: 1px solid var(--jade-border);
+    border-radius: 14px;
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--jade);
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .note-block:hover,
+  .note-block:focus-visible {
+    border-color: var(--jade);
+    background: #dfeae2;
+    outline: none;
+  }
+
+  .note-block:focus-visible {
+    outline: 2px solid var(--jade);
+    outline-offset: 2px;
   }
 
   /* Invisible hit-slop: enlarges the tap target on touch devices
@@ -616,6 +659,10 @@
   </div>
 
   <main class="tree" aria-label="Family tree"></main>
+
+  <div class="note-block-wrap">
+    <span class="note-block" role="link" tabindex="0" data-nav-info="song-hy" aria-label="Mè Xửng Song Hỷ — unrelated to family lineage">Mè Xửng Song Hỷ</span>
+  </div>
 </div>
 
 <!-- DETAIL VIEW (PERSON & INFO PAGES) -->
@@ -645,6 +692,24 @@ const CROWN_ICON_SVG = `<svg class="crown-icon" viewBox="0 0 24 24" fill="curren
    INFO PAGES DATA
 --------------------------------------------------------- */
 const infoPages = {
+  "song-hy": {
+    name: {
+      en: "Mè Xửng Song Hỷ",
+      vi: "Mè Xửng Song Hỷ"
+    },
+    title: {
+      en: "A Family Confectionery Legacy in Huế",
+      vi: "Di Sản Bánh Kẹo Gia Truyền Xứ Huế"
+    },
+    bio: {
+      en: `<p>Song Hỷ was originally established during the 1940s as a famous family confectionery brand in Huế, laying the foundation for traditional sesame candy craftsmanship in the region.</p>
+<p>When taking over her family's workshop, Ms. Hồ Thị Hoa sought to preserve the legacy of Song Hỷ while turning Huế sesame candy into a signature culinary gift for travelers. In 1978, she officially transitioned the product line under the name Mè Xửng Thiên Hương, meaning "flavor of heaven," to honor the traditional heritage built by Song Hỷ and the culinary essence of the ancient capital.</p>
+<p>Under Ms. Hoa's leadership, the heritage of Song Hỷ evolved from a small family operation into Thiên Hương Co., Ltd., growing from under 100 million VND in initial capital into a 20 billion VND enterprise. While modernizing packaging and refining recipes to reduce sweetness and highlight roasted sesame and peanut flavors, the company continues the core techniques derived from Song Hỷ. Today, the lineage of Song Hỷ through Thiên Hương consumes over 30 percent of Huế City's agricultural output annually, operating nationwide distribution and international export channels.</p>`,
+      vi: `<p>Song Hỷ được thành lập vào những năm 1940, là một thương hiệu bánh kẹo gia truyền nổi tiếng tại Huế, đặt nền móng vững chắc cho nghề làm mè xửng truyền thống nơi xứ Kinh Kỳ.</p>
+<p>Khi kế nghiệp xưởng sản xuất gia truyền, bà Hồ Thị Hoa luôn đau đáu nỗi niềm bảo tồn tinh hoa thương hiệu Song Hỷ, đồng thời đưa mè xửng trở thành món quà đặc sản mang nét đặc trưng của đất Thần Kinh. Đến năm 1978, bà chính thức chuyển đổi và đặt tên cho dòng sản phẩm của mình là Mè Xửng Thiên Hương, mang ý nghĩa "hương vị của trời", nhằm tôn vinh những giá trị truyền thống vốn có từ Song Hỷ và nét tinh túy ẩm thực của cố đô.</p>
+<p>Dưới sự dẫn dắt của bà Hoa, nền tảng của Song Hỷ đã phát triển từ quy mô hộ cá thể thành Công ty TNHH Thiên Hương, nâng số vốn đầu tư từ chưa đến 100 triệu đồng ban đầu lên đến 20 tỷ đồng. Bên cạnh việc đổi mới mẫu mã bao bì và cải tiến công thức giảm độ ngọt để làm nổi bật vị thơm tự nhiên của mè rang và vị bùi béo của đậu phụng, công ty vẫn giữ trọn phương pháp sản xuất truyền thống kế thừa từ Song Hỷ. Ngày nay, tiếp nối chặng đường phát triển từ Song Hỷ, Thiên Hương tiêu thụ trên 30% sản lượng nông sản của thành phố Huế hàng năm, sở hữu hàng trăm đại lý trên khắp cả nước cùng các kênh xuất khẩu ra quốc tế.</p>`
+    }
+  },
   "royal-surnames": {
     name: {
       en: "Distinct Royal Generational Surnames",
@@ -1184,9 +1249,24 @@ const familyTree = [
   <li>Xuân Lai Công chúa Nguyễn Phúc Nhu Nghi (22/11/1833 – 1929) – Hoàng nữ thứ 44, sống thọ nhất trong các con của vua Minh Mạng</li>
 </ul>` } },
     { id: "gen1-spouse-unknown", gender: "female", isRoyalDirectLine: false, name: null,
-      placeholder: { en: "Not yet known", vi: "Chưa rõ" },
+      placeholder: { en: "Unknown*", vi: "Chưa rõ*" },
       title: null,
-      bio: { en: "This ancestor has not been identified yet.", vi: "Chưa xác định được tổ tiên này." } }
+      bio: { en: `<p>This ancestor has not been identified yet.</p>
+<p>It is unclear exactly how many consorts Duke Vĩnh Lộc had; to date, only three are known:</p>
+<ul>
+  <li>1. First Consort: Nguyễn Thị Khuê.</li>
+  <li>2. Second Consort: Nguyễn Đức Thị Ngân.</li>
+  <li>3. Fifth Consort: Nguyễn Hữu Thị Mẫn.</li>
+</ul>
+<p>Consequently, it is unknown which woman was the paternal grandmother of Công Tôn Nữ Thị Liên.</p>`,
+        vi: `<p>Chưa xác định được tổ tiên này.</p>
+<p>Hiện chưa rõ chính xác Vĩnh Lộc Quận công có bao nhiêu bà vợ; cho đến nay, chỉ biết được ba người:</p>
+<ul>
+  <li>1. Vợ cả: Nguyễn Thị Khuê.</li>
+  <li>2. Vợ thứ hai: Nguyễn Đức Thị Ngân.</li>
+  <li>3. Vợ thứ năm: Nguyễn Hữu Thị Mẫn.</li>
+</ul>
+<p>Do đó, chưa xác định được bà nào trong số này là bà nội của Công Tôn Nữ Thị Liên.</p>` } }
   ]},
   { note: "Generation 2 (Hường)", people: [
     { id: "gen2-unknown-male", gender: "male", isRoyalDirectLine: true, name: "Nguyễn Phúc <span class=\"gen-marker\">Hường</span> Lục", placeholder: null,
@@ -1234,12 +1314,13 @@ const familyTree = [
       bio: { en: `<div class="meta-grid">
   <div class="meta-item"><span class="meta-label">Personal Name</span><span class="meta-value">Lý Trường Ích (李長益)</span></div>
   <div class="meta-item"><span class="meta-label">Ancestral Origin</span><span class="meta-value">Hainan Island, Wenchang County, Duoji Village (海南島，文昌縣，多吉村)</span></div>
+  <div class="meta-item"><span class="meta-label">Parents</span><span class="meta-value">Lý Ly & Nguyễn Thị Tý</span></div>
   <div class="meta-item"><span class="meta-label">Spouse</span><span class="meta-value">Nguyễn Phúc Công Tôn Nữ Thị Liên</span></div>
   <div class="meta-item"><span class="meta-label">Profession</span><span class="meta-value">Traditional Chinese Medicine Practitioner</span></div>
 </div>
 
 <h2>Ancestry & Origin</h2>
-<p>Lý Trường Ích (Chinese characters: 李長益) originated from Duoji Village, Wenchang County, Hainan Island, China (海南島，文昌縣，多吉村).</p>
+<p>Lý Trường Ích (Chinese characters: 李長益) originated from Duoji Village, Wenchang County, Hainan Island, China (海南島，文昌縣，多吉村). He was the son of Lý Ly and Nguyễn Thị Tý.</p>
 
 <h2>Life & Profession</h2>
 <p>He was a practitioner of traditional Chinese medicine. Because of his profession, the local community in the area where he lived respectfully referred to his wife, Lady Thị Liên, as “Bà Thầy” (the Master's Wife).</p>`,
@@ -1247,12 +1328,13 @@ const familyTree = [
         vi: `<div class="meta-grid">
   <div class="meta-item"><span class="meta-label">Họ Và Tên</span><span class="meta-value">Lý Trường Ích (李長益)</span></div>
   <div class="meta-item"><span class="meta-label">Nguyên Quán</span><span class="meta-value">Đảo Hải Nam, huyện Văn Xương, làng Đa Cát (海南島，文昌縣，多吉村)</span></div>
+  <div class="meta-item"><span class="meta-label">Song Thân</span><span class="meta-value">Lý Ly & Nguyễn Thị Tý</span></div>
   <div class="meta-item"><span class="meta-label">Phu Nhân</span><span class="meta-value">Nguyễn Phúc Công Tôn Nữ Thị Liên</span></div>
   <div class="meta-item"><span class="meta-label">Nghề Nghiệp</span><span class="meta-value">Thầy thuốc Đông y</span></div>
 </div>
 
 <h2>Xuất Thân & Nguyên Quán</h2>
-<p>Lý Trường Ích (chữ Hán: 李長益) có nguyên quán gốc tại làng Đa Cát, huyện Văn Xương, đảo Hải Nam, Trung Quốc (海南島，文昌縣，多吉村).</p>
+<p>Lý Trường Ích (chữ Hán: 李長益) có nguyên quán gốc tại làng Đa Cát, huyện Văn Xương, đảo Hải Nam, Trung Quốc (海南島，文昌縣，多吉村). Ông là con trai của ông Lý Ly và bà Nguyễn Thị Tý.</p>
 
 <h2>Cuộc Đời & Nghề Nghiệp</h2>
 <p>Ông là một thầy thuốc Đông y truyền thống. Chính vì nghề nghiệp chữa bệnh cứu người của ông, người dân địa phương trong vùng nơi hai vợ chồng sinh sống thường kính trọng gọi phu nhân của ông (bà Thị Liên) bằng danh xưng "Bà Thầy".</p>` } },
@@ -1286,7 +1368,7 @@ const familyTree = [
 
 <h3>Brothers (1)</h3>
 <ul>
-  <li>Ưng Thúc</li>
+  <li>Ưng Thúc (younger)</li>
 </ul>
 
 <h3>Sisters (3)</h3>
@@ -1324,7 +1406,7 @@ const familyTree = [
 
 <h3>Anh Em Trai (1)</h3>
 <ul>
-  <li>Ưng Thúc</li>
+  <li>Ưng Thúc (younger)</li>
 </ul>
 
 <h3>Chị Em Gái (3)</h3>
