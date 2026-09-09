@@ -196,6 +196,25 @@
     outline-offset: 2px;
   }
 
+  .ext-link {
+    color: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1.5px solid var(--gold);
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .ext-link:hover,
+  .ext-link:focus-visible {
+    border-bottom-color: var(--indigo);
+    color: var(--indigo);
+  }
+
+  .ext-link:focus-visible {
+    outline: 2px solid var(--indigo);
+    outline-offset: 2px;
+  }
+
   /* Tree view */
   .tree {
     position: relative;
@@ -703,12 +722,10 @@ const infoPages = {
       vi: "Di Sản Bánh Kẹo Gia Truyền Xứ Huế"
     },
     bio: {
-      en: `<p>Song Hỷ was originally established during the 1940s as a famous family confectionery brand in Huế, laying the foundation for traditional sesame candy craftsmanship in the region.</p>
-<p>When taking over her family's workshop, Ms. Hồ Thị Hoa sought to preserve the legacy of Song Hỷ while turning Huế sesame candy into a signature culinary gift for travelers. In 1978, she officially transitioned the product line under the name Mè Xửng Thiên Hương, meaning "flavor of heaven," to honor the traditional heritage built by Song Hỷ and the culinary essence of the ancient capital.</p>
-<p>Under Ms. Hoa's leadership, the heritage of Song Hỷ evolved from a small family operation into Thiên Hương Co., Ltd., growing from under 100 million VND in initial capital into a 20 billion VND enterprise. While modernizing packaging and refining recipes to reduce sweetness and highlight roasted sesame and peanut flavors, the company continues the core techniques derived from Song Hỷ. Today, the lineage of Song Hỷ through Thiên Hương consumes over 30 percent of Huế City's agricultural output annually, operating nationwide distribution and international export channels.</p>`,
-      vi: `<p>Song Hỷ được thành lập vào những năm 1940, là một thương hiệu bánh kẹo gia truyền nổi tiếng tại Huế, đặt nền móng vững chắc cho nghề làm mè xửng truyền thống nơi xứ Kinh Kỳ.</p>
-<p>Khi kế nghiệp xưởng sản xuất gia truyền, bà Hồ Thị Hoa luôn đau đáu nỗi niềm bảo tồn tinh hoa thương hiệu Song Hỷ, đồng thời đưa mè xửng trở thành món quà đặc sản mang nét đặc trưng của đất Thần Kinh. Đến năm 1978, bà chính thức chuyển đổi và đặt tên cho dòng sản phẩm của mình là Mè Xửng Thiên Hương, mang ý nghĩa "hương vị của trời", nhằm tôn vinh những giá trị truyền thống vốn có từ Song Hỷ và nét tinh túy ẩm thực của cố đô.</p>
-<p>Dưới sự dẫn dắt của bà Hoa, nền tảng của Song Hỷ đã phát triển từ quy mô hộ cá thể thành Công ty TNHH Thiên Hương, nâng số vốn đầu tư từ chưa đến 100 triệu đồng ban đầu lên đến 20 tỷ đồng. Bên cạnh việc đổi mới mẫu mã bao bì và cải tiến công thức giảm độ ngọt để làm nổi bật vị thơm tự nhiên của mè rang và vị bùi béo của đậu phụng, công ty vẫn giữ trọn phương pháp sản xuất truyền thống kế thừa từ Song Hỷ. Ngày nay, tiếp nối chặng đường phát triển từ Song Hỷ, Thiên Hương tiêu thụ trên 30% sản lượng nông sản của thành phố Huế hàng năm, sở hữu hàng trăm đại lý trên khắp cả nước cùng các kênh xuất khẩu ra quốc tế.</p>`
+      en: `<p>Song Hỷ was originally founded in the 1940s in Huế by our family, becoming one of the most celebrated artisanal sesame candy makers in the ancient capital. Following the war, our family was forced to flee Vietnam and resettle in the United States. The foundational brand, recipes, and workshop in Huế were subsequently inherited and transitioned into Mè Xửng Thiên Hương starting in 1978, which grew into the primary commercial distributor of the original recipe today.</p>
+<p>Read more about it <a class="ext-link" href="https://thuonggiaonline.vn/doanh-nhan-ho-thi-hoa-nguoi-gin-giu-huong-vi-troi-cho-me-xung-hue-post563718.html" target="_blank" rel="noopener noreferrer">here</a>.</p>`,
+      vi: `<p>Song Hỷ ban đầu do gia đình chúng tôi thành lập vào những năm 1940 tại Huế, trở thành một trong những lò làm kẹo mè xửng thủ công nổi tiếng nhất tại vùng đất cố đô. Sau chiến tranh, gia đình chúng tôi buộc phải rời bỏ Việt Nam và sang định cư tại Hoa Kỳ. Thương hiệu, công thức gia truyền cùng xưởng sản xuất gốc tại Huế sau đó đã được tiếp quản và chuyển đổi thành Mè Xửng Thiên Hương từ năm 1978, đơn vị mà ngày nay đã phát triển thành nhà phân phối thương mại chính cho công thức gốc này.</p>
+<p>Đọc thêm tại <a class="ext-link" href="https://thuonggiaonline.vn/doanh-nhan-ho-thi-hoa-nguoi-gin-giu-huong-vi-troi-cho-me-xung-hue-post563718.html" target="_blank" rel="noopener noreferrer">đây</a>.</p>`
     }
   },
   "royal-surnames": {
