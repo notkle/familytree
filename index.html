@@ -898,7 +898,7 @@ const infoPages = {
 const familyTree = [
   { note: "Generation -1", people: [
     { id: "gia-long", gender: "male", isRoyalDirectLine: true, name: "Gia Long", placeholder: null,
-      title: { en: "Founder & 1st Emperor of Nguyễn Dynasty", vi: "Hoàng Đế Khai Quốc Triều Nguyễn" },
+      title: { en: "1st Emperor of Nguyễn Dynasty", vi: "Hoàng Đế Khai Quốc Triều Nguyễn" },
       bio: { en: `<div class="meta-grid">
   <div class="meta-item"><span class="meta-label">Personal Name</span><span class="meta-value">Nguyễn Phúc Ánh (阮福映)</span></div>
   <div class="meta-item"><span class="meta-label">Reign</span><span class="meta-value">1802 – 1820</span></div>
@@ -1510,6 +1510,40 @@ const familyTree = [
   ]}
 ];
 
+/* Tag each person with a numeric generation (from the node note) and work out
+   which generation is the "me" row, so relation labels can be computed. */
+familyTree.forEach((node) => {
+  const gen = parseInt(node.note.match(/-?\d+/)[0], 10);
+  node.people.forEach((person) => { person.gen = gen; });
+});
+const ME_GEN = Math.max(...familyTree.map((node) => node.people[0].gen));
+
+/* Relation to "me": Father / Grandfather / Great-grandfather, then
+   "Great ×2 grandfather", "Great ×3 grandfather", and so on.
+   Unnamed people are skipped because their placeholder label already
+   says the relation. */
+function relationLabel(person, lang) {
+  if (!person.name) return "";
+  const up = ME_GEN - person.gen;
+  if (up < 1 || (person.gender !== "male" && person.gender !== "female")) return "";
+  const male = person.gender === "male";
+  if (up === 1) return lang === "vi" ? (male ? "Bố" : "Mẹ") : (male ? "Father" : "Mother");
+  if (up === 2) return lang === "vi" ? (male ? "Ông nội" : "Bà nội") : (male ? "Grandfather" : "Grandmother");
+  if (up === 3) return lang === "vi" ? (male ? "Ông cố" : "Bà cố") : (male ? "Great-grandfather" : "Great-grandmother");
+  const n = up - 2;
+  return lang === "vi"
+    ? `${male ? "Ông" : "Bà"} cố ×${n}`
+    : `Great ×${n} ${male ? "grandfather" : "grandmother"}`;
+}
+
+/* One subtext line: existing title first, relation in parentheses after it.
+   With no title, the relation stands alone (no parentheses). */
+function subtextLine(person, lang) {
+  const relation = relationLabel(person, lang);
+  const title = person.title ? person.title[lang] : "";
+  return title && relation ? `${title} (${relation})` : (title || relation);
+}
+
 function findPersonById(id) {
   for (const node of familyTree) {
     for (const person of node.people) {
@@ -1581,7 +1615,7 @@ function renderTree(lang) {
     const rows = node.people.map((person) => {
       const isPlaceholder = !person.name;
       let label = isPlaceholder ? (person.placeholder ? person.placeholder[lang] : "") : person.name;
-      const title = person.title ? person.title[lang] : "";
+      const subtext = subtextLine(person, lang);
       const isNonClickable = nonClickableIds.includes(person.id);
       const iconHtml = genderIcon(person.gender);
 
@@ -1594,7 +1628,7 @@ function renderTree(lang) {
                 ? `<span class="person-name${isPlaceholder ? " is-placeholder" : ""} non-clickable">${label}</span>${person.isRoyalDirectLine ? CROWN_ICON_SVG : ""}`
                 : `<span class="person-name${isPlaceholder ? " is-placeholder" : ""}" role="link" tabindex="0" data-nav="${encodeURIComponent(person.id)}">${label}</span>${person.isRoyalDirectLine ? CROWN_ICON_SVG : ""}`
             }
-            ${title ? `<span class="person-title">${title}</span>` : ""}
+            ${subtext ? `<span class="person-title">${subtext}</span>` : ""}
           </div>
         </div>`;
     }).join("");
@@ -1632,9 +1666,9 @@ function renderPerson(lang, id) {
   nameEl.innerHTML = label + (person.isRoyalDirectLine ? CROWN_ICON_SVG : "");
   nameEl.classList.toggle("is-placeholder", isPlaceholder);
 
-  const title = person.title ? person.title[lang] : "";
-  titleEl.textContent = title;
-  titleEl.style.display = title ? "block" : "none";
+  const subtext = subtextLine(person, lang);
+  titleEl.textContent = subtext;
+  titleEl.style.display = subtext ? "block" : "none";
 
   bioEl.innerHTML = person.bio[lang];
   document.title = `${label.replace(/<[^>]*>/g, '')} · ${lang === "vi" ? "Gia Phả" : "Family Tree"}`;
