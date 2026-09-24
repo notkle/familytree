@@ -1428,23 +1428,68 @@ const familyTree = [
 </ul>` } }
   ]},
   { note: "Generation 4", people: [
-    { id: "great-grandfather", gender: "male", isRoyalDirectLine: true, name: null,
+    { id: "great-grandfather", gender: "male", isRoyalDirectLine: true, name: "Lý Thơ Biên",
       placeholder: { en: "Great-grandfather", vi: "Ông cố" },
       title: null,
-      bio: { en: "Name and biography to be added.", vi: "Tên và tiểu sử sẽ được bổ sung." } },
-    { id: "great-grandmother", gender: "female", isRoyalDirectLine: false, name: null,
+      bio: { en: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Personal Name</span><span class="meta-value">Lý Thơ Biên</span></div>
+  <div class="meta-item"><span class="meta-label">Profession</span><span class="meta-value">Owner of Song Hỷ sesame candy shop, Huế</span></div>
+  <div class="meta-item"><span class="meta-label">Daughter</span><span class="meta-value">Lý Lệ Hương</span></div>
+  <div class="meta-item"><span class="meta-label">Brother</span><span class="meta-value">Lý Thơ Du (younger)</span></div>
+</div>
+
+<h2>Life & Profession</h2>
+<p>Lý Thơ Biên once owned a well-known sesame candy shop in Huế called Song Hỷ.</p>
+
+<h2>Children</h2>
+<p>He had a daughter named Lý Lệ Hương.</p>
+
+<h2>Siblings</h2>
+
+<h3>Brothers (1)</h3>
+<ul>
+  <li>Lý Thơ Du (younger)</li>
+</ul>
+
+<h3>About Lý Thơ Du</h3>
+<p>Lý Thơ Du, the younger brother of Lý Thơ Biên, lived in Đà Nẵng. There he previously operated a fairly large general-goods business, selling both wholesale and retail under the name Hiệp Lợi.</p>`,
+
+        vi: `<div class="meta-grid">
+  <div class="meta-item"><span class="meta-label">Họ Và Tên</span><span class="meta-value">Lý Thơ Biên</span></div>
+  <div class="meta-item"><span class="meta-label">Nghề Nghiệp</span><span class="meta-value">Chủ tiệm kẹo mè Song Hỷ, Huế</span></div>
+  <div class="meta-item"><span class="meta-label">Ái Nữ</span><span class="meta-value">Lý Lệ Hương</span></div>
+  <div class="meta-item"><span class="meta-label">Em Trai</span><span class="meta-value">Lý Thơ Du</span></div>
+</div>
+
+<h2>Cuộc Đời & Nghề Nghiệp</h2>
+<p>Ông Lý Thơ Biên từng là chủ một tiệm kẹo mè nổi tiếng tại Huế mang tên Song Hỷ.</p>
+
+<h2>Con Cái</h2>
+<p>Ông có một người con gái tên là Lý Lệ Hương.</p>
+
+<h2>Anh Chị Em Cùng Thế Hệ</h2>
+
+<h3>Anh Em Trai (1)</h3>
+<ul>
+  <li>Lý Thơ Du (em)</li>
+</ul>
+
+<h3>Về Ông Lý Thơ Du</h3>
+<p>Ông Lý Thơ Du, em trai của ông Lý Thơ Biên, sinh sống tại Đà Nẵng. Trước đây, ông từng kinh doanh một cửa hàng tạp hóa khá lớn tại đây, bán cả sỉ lẫn lẻ với tên gọi Hiệp Lợi.</p>` } },
+
+    { id: "great-grandmother", gender: "female", isRoyalDirectLine: false, name: "Hàng Thị Sác",
       placeholder: { en: "Great-grandmother", vi: "Bà cố" },
       title: null,
       bio: { en: "Name and biography to be added.", vi: "Tên và tiểu sử sẽ được bổ sung." } }
   ]},
   { note: "Generation 5", people: [
-    { id: "grandfather", gender: "male", isRoyalDirectLine: true, name: "Hung Van Ly",
+    { id: "grandfather", gender: "male", isRoyalDirectLine: true, name: "Lý Văn Hùng",
       placeholder: { en: "Grandfather", vi: "Ông nội" },
       title: null,
       bio: { en: "Name and biography to be added.", vi: "Tên và tiểu sử sẽ được bổ sung." } },
-    { id: "grandmother", gender: "female", isRoyalDirectLine: false, name: "Lan Tran",
+    { id: "grandmother", gender: "female", isRoyalDirectLine: false, name: "Trần Văn Lan",
       placeholder: { en: "Grandmother", vi: "Bà nội" },
-      title: { en: "Grandmother", vi: "Bà nội" },
+      title: null,
       bio: { en: "Name and biography to be added.", vi: "Tên và tiểu sử sẽ được bổ sung." } }
   ]},
   { note: "Generation 6", people: [
@@ -1525,7 +1570,7 @@ function genderIcon(gender) {
 function renderTree(lang) {
   const root = document.querySelector(".tree");
   const nonClickableIds = [
-    "great-grandfather", "great-grandmother",
+    "great-grandmother",
     "grandfather", "grandmother",
     "father", "mother",
     "me",
