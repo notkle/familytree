@@ -1291,7 +1291,7 @@ const familyTree = [
   <li>Nghĩa Điền Công chúa Nguyễn Phúc Trinh Nhàn (14/6/1827 – 28/7/1902) – Hoàng nữ thứ 26</li>
   <li>Xuân Lai Công chúa Nguyễn Phúc Nhu Nghi (22/11/1833 – 1929) – Hoàng nữ thứ 44, sống thọ nhất trong các con của vua Minh Mạng</li>
 </ul>` } },
-    { id: "gen1-spouse-unknown", gender: "female", isRoyalDirectLine: false, name: null,
+    { id: "gen1-spouse-unknown", gender: "female", isRoyalDirectLine: false, name: null, showRelation: true,
       placeholder: { en: "Unknown*", vi: "Chưa rõ*" },
       title: null,
       bio: { en: `<p>This ancestor has not been identified yet.</p>
@@ -1521,9 +1521,9 @@ const ME_GEN = Math.max(...familyTree.map((node) => node.people[0].gen));
 /* Relation to "me": Father / Grandfather / Great-grandfather, then
    "Great ×2 grandfather", "Great ×3 grandfather", and so on.
    Unnamed people are skipped because their placeholder label already
-   says the relation. */
+   says the relation, unless flagged showRelation (e.g. "Unknown*"). */
 function relationLabel(person, lang) {
-  if (!person.name) return "";
+  if (!person.name && !person.showRelation) return "";
   const up = ME_GEN - person.gen;
   if (up < 1 || (person.gender !== "male" && person.gender !== "female")) return "";
   const male = person.gender === "male";
