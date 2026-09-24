@@ -1536,12 +1536,12 @@ function relationLabel(person, lang) {
     : `Great ×${n} ${male ? "grandfather" : "grandmother"}`;
 }
 
-/* One subtext line: existing title first, relation in parentheses after it.
+/* One subtext line: family relation first, existing title in parentheses after it.
    With no title, the relation stands alone (no parentheses). */
 function subtextLine(person, lang) {
   const relation = relationLabel(person, lang);
   const title = person.title ? person.title[lang] : "";
-  return title && relation ? `${title} (${relation})` : (title || relation);
+  return title && relation ? `${relation} (${title})` : (relation || title);
 }
 
 function findPersonById(id) {
