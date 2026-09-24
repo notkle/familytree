@@ -368,6 +368,15 @@
     margin-top: 2px;
   }
 
+  /* Role after the family relation: "Relation (Role)" on one line by default;
+     on phones the role drops to its own line with no parentheses. */
+  .st-role::before { content: " ("; }
+  .st-role::after { content: ")"; }
+  @media (max-width: 600px) {
+    .st-role { display: block; }
+    .st-role::before, .st-role::after { content: none; }
+  }
+
   /* Information / Person Detail View */
   .detail-page {
     max-width: 560px;
@@ -1536,12 +1545,13 @@ function relationLabel(person, lang) {
     : `Great ×${n} ${male ? "grandfather" : "grandmother"}`;
 }
 
-/* One subtext line: family relation first, existing title in parentheses after it.
-   With no title, the relation stands alone (no parentheses). */
+/* Subtext markup: family relation first, existing title after it in a
+   .st-role span (CSS adds the parentheses, or moves it to its own line on
+   phones). With no title, the relation stands alone. */
 function subtextLine(person, lang) {
   const relation = relationLabel(person, lang);
   const title = person.title ? person.title[lang] : "";
-  return title && relation ? `${relation} (${title})` : (relation || title);
+  return title && relation ? `${relation}<span class="st-role">${title}</span>` : (relation || title);
 }
 
 function findPersonById(id) {
@@ -1667,7 +1677,7 @@ function renderPerson(lang, id) {
   nameEl.classList.toggle("is-placeholder", isPlaceholder);
 
   const subtext = subtextLine(person, lang);
-  titleEl.textContent = subtext;
+  titleEl.innerHTML = subtext;
   titleEl.style.display = subtext ? "block" : "none";
 
   bioEl.innerHTML = person.bio[lang];
