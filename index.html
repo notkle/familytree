@@ -368,15 +368,8 @@
     margin-top: 2px;
   }
 
-  /* Role after the family relation: "Relation (Role)" on one line by default;
-     on phones the role drops to its own line with no parentheses. */
-  .st-role { font-style: italic; }
-  .st-role::before { content: " ("; }
-  .st-role::after { content: ")"; }
-  @media (max-width: 600px) {
-    .st-role { display: block; }
-    .st-role::before, .st-role::after { content: none; }
-  }
+  /* Role after the family relation: on its own line, italic, no parentheses. */
+  .st-role { display: block; font-style: italic; }
 
   /* Information / Person Detail View */
   .detail-page {
@@ -1547,8 +1540,8 @@ function relationLabel(person, lang) {
 }
 
 /* Subtext markup: family relation first, existing title after it in a
-   .st-role span (CSS adds the parentheses, or moves it to its own line on
-   phones). With no title, the relation stands alone. */
+   .st-role span (CSS puts it on its own line in italics). With no title,
+   the relation stands alone. */
 function subtextLine(person, lang) {
   const relation = relationLabel(person, lang);
   const title = person.title ? person.title[lang] : "";
